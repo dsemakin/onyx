@@ -43,7 +43,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Toolchain
         run: |
           rustup toolchain install stable --profile minimal --component rustfmt,clippy
@@ -60,7 +60,7 @@ jobs:
     name: Minimum supported Rust version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Kept in step with rust-version in Cargo.toml. Bumping it is a breaking change for
       # downstream crates, so it is tested rather than assumed.
       - run: |
@@ -72,7 +72,7 @@ jobs:
     name: Python reader against the corpus
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Python is preinstalled on the runners, and the reader uses only the standard
       # library. This is what keeps "the spec is implementable from spec/ and corpus/
       # alone" a fact rather than a claim.
@@ -92,7 +92,7 @@ jobs:
     # skipping it is how the thing it guards gets forgotten.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install nightly --profile minimal
       - run: cargo +nightly check --manifest-path fuzz/Cargo.toml
 
@@ -103,7 +103,7 @@ jobs:
     # forever — which is exactly why it must be wired up: the day it is not quiet is the day
     # something arrived that nobody chose.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       - run: cargo install cargo-audit --locked
       - run: cargo audit --deny warnings
@@ -114,7 +114,7 @@ jobs:
     # The binding was previously built only inside release.yml, so a change that broke it
     # merged cleanly and surfaced during a release — beside an irreversible publish.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       - run: rustup target add wasm32-unknown-unknown
       - name: Build
@@ -130,7 +130,7 @@ jobs:
     name: Repository consistency
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: node scripts/check-links.mjs
       - run: node scripts/vendor.mjs --check
       # A crate that reaches outside its own directory builds here and fails once
@@ -141,7 +141,7 @@ jobs:
     name: Corpus against the JSON Schema
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Node is preinstalled on the runners, so no setup action is needed. Ajv is not a
       # dependency of this project; it is installed transiently and nothing is committed.
       - run: npm install --no-save --no-package-lock --no-audit --no-fund ajv@8
@@ -151,7 +151,7 @@ jobs:
     name: Published spec is unmodified
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # spec/v1 matches documents already in users' hands. It is never edited in place;

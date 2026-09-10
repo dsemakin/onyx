@@ -20,7 +20,7 @@ jobs:
   compare:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fetch published schema
         id: fetch
         run: curl -sS --fail -m 30 "$CANONICAL_URL" -o /tmp/published.json
