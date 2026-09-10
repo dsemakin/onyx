@@ -1,0 +1,145 @@
+name: Release
+
+# Publishes on a version tag. Nothing here runs on a normal push.
+#
+# Required secret:
+#   NPM_TOKEN   npm granular token with publish rights on the @dsemakin scope
+#
+# The crates are deliberately not published to crates.io. The binaries below deliver the
+# CLI, and the wasm module carries the engine to JavaScript, so nothing in the first
+# release needs the registry; a crates.io version is permanent and would freeze the public
+# Rust API before anyone outside the project has used it. Adding a `crates` job later is
+# a small change; taking a publish back is impossible.
+#
+# As in CI, third-party actions are avoided: rustup, npm and the GitHub CLI are all
+# preinstalled on the runners, and a shell line does not deprecate its own runtime.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Granted per job rather than workflow-wide: only the two jobs that touch the GitHub
+# release need write access, and the npm job holds its registry token separately.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify before publishing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: cargo test --locked --workspace --all-features
+
+  release:
+    name: Create the GitHub release
+    permissions:
+      contents: write
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Pushing a tag does not create a release; `gh release upload` needs one to exist.
+      # Without this the binary matrix fails with "release not found" AFTER the registry
+      # publishes below have already happened, and those cannot be taken back.
+      - name: Create it, unless a re-run already did
+        shell: bash
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "$GITHUB_REF_NAME already exists; leaving it as it is."
+          else
+              gh release create "$GITHUB_REF_NAME" \
+                --verify-tag \
+                --title "onyx ${GITHUB_REF_NAME#v}" \
+                --notes "See [CHANGELOG.md](https://github.com/dsemakin/onyx/blob/main/CHANGELOG.md)."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm:
+    name: Publish to npm
+    # Deliberately after the binaries. npm is a one-way door, so everything that can
+    # still fail is made to fail first.
+    needs: binaries
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      # No wasm-pack and no wasm-bindgen: wasm32-unknown-unknown is a rustup target and
+      # the ABI is hand-written, so there is no tool version to keep in step.
+      - run: rustup target add wasm32-unknown-unknown
+      - name: Build the wasm module
+        run: |
+          cargo build --locked --release --package onyx-wasm --target wasm32-unknown-unknown
+          mkdir -p packages/npm/pkg
+          cp target/wasm32-unknown-unknown/release/onyx_wasm.wasm packages/npm/pkg/onyx.wasm
+      - name: Run the corpus through the binding
+        working-directory: packages/npm
+        run: npm test
+      - name: Publish
+        working-directory: packages/npm
+        run: |
+          # The trap, not a trailing `rm`: the step aborts on a failed publish, and the
+          # plain version left a file holding a live npm token on the runner.
+          trap 'rm -f .npmrc' EXIT
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          name="$(node -p 'require("./package.json").name')"
+          version="$(node -p 'require("./package.json").version')"
+          if npm view "${name}@${version}" version >/dev/null 2>&1; then
+            echo "${name}@${version} is already published; skipping."
+          else
+            npm publish
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  binaries:
+    name: Binary (${{ matrix.target }})
+    permissions:
+      contents: write
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-gnu, linker: gcc-aarch64-linux-gnu }
+          - { os: macos-latest, target: x86_64-apple-darwin }
+          - { os: macos-latest, target: aarch64-apple-darwin }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc }
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: rustup target add ${{ matrix.target }}
+
+      - name: Cross linker
+        if: matrix.linker != ''
+        run: |
+          sudo apt-get update && sudo apt-get install -y ${{ matrix.linker }}
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
+
+      - run: cargo build --locked --release --package onyx-cli --target ${{ matrix.target }}
+
+      - name: Package
+        shell: bash
+        run: |
+          name="onyx-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "${name}.zip" "./target/${{ matrix.target }}/release/onyx.exe" ./LICENSE ./LICENSES ./README.md
+            echo "ASSET=${name}.zip" >> "$GITHUB_ENV"
+          else
+            tar czf "${name}.tar.gz" -C "target/${{ matrix.target }}/release" onyx -C "$GITHUB_WORKSPACE" LICENSE LICENSES README.md
+            echo "ASSET=${name}.tar.gz" >> "$GITHUB_ENV"
+          fi
+
+      - name: Upload to the release
+        shell: bash
+        run: gh release upload "$GITHUB_REF_NAME" "$ASSET" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

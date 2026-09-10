@@ -1,0 +1,9 @@
+{
+  "name": "Onyx v1",
+  "description": "A portable personal food and body-weight diary.",
+  "fileMatch": [
+    "*.onyx.json",
+    "*.onx.json"
+  ],
+  "url": "https://www.schemastore.org/onyx-v1.json"
+}

@@ -1,0 +1,36 @@
+name: Spec drift
+
+# The schema in this repository must stay byte-identical to the one served at the
+# canonical URL, because documents in the wild point at that URL. This runs weekly
+# rather than on every push, since it depends on a third party being reachable.
+
+# The weekly schedule is commented out until the schema is registered with
+# SchemaStore; until then the URL 404s and this would fail every Monday for no
+# reason. Re-enable the cron line the moment registration lands.
+on:
+  # schedule:
+  #   - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+# Fetches a public URL and compares it to a file in the checkout. Nothing else.
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch published schema
+        id: fetch
+        run: curl -sS --fail -m 30 "$CANONICAL_URL" -o /tmp/published.json
+        env:
+          # Configuration, never hardcoded in the engine. This URL will move.
+          CANONICAL_URL: https://www.schemastore.org/onyx-v1.json
+      - name: Compare
+        run: |
+          if ! diff -u spec/v1/log.schema.json /tmp/published.json; then
+            echo "::error::Published schema differs from spec/v1/log.schema.json"
+            exit 1
+          fi
+          echo "identical"

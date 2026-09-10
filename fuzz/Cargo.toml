@@ -1,0 +1,37 @@
+# Coverage-guided fuzzing for the hand-written JSON parser.
+#
+# Deliberately NOT a workspace member: it needs nightly Rust and it pulls in libfuzzer-sys,
+# and neither of those should touch the crates people actually install. `onyx-core` still
+# has no dependencies. Nothing here is published.
+#
+#   cargo +nightly fuzz run parse
+#
+# The dependency-free half of this lives in crates/onyx-core/tests/robustness.rs, which runs
+# on stable in ordinary CI on every push.
+
+[package]
+name = "onyx-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+onyx-core = { path = "../crates/onyx-core" }
+
+[[bin]]
+name = "parse"
+path = "fuzz_targets/parse.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "document"
+path = "fuzz_targets/document.rs"
+test = false
+doc = false
+bench = false

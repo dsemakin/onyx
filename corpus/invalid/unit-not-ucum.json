@@ -1,0 +1,22 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T12:00:00+03:00",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Invented Units" },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+03:00",
+          "name": "Oats",
+          "nutrients": {
+            "energy": { "value": 389, "unit": "calories" },
+            "protein": { "value": 16.9, "unit": "grams" }
+          }
+        }
+      ]
+    }
+  ]
+}

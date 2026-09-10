@@ -1,0 +1,30 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "producer": {
+    "name": "Logs A Percentage"
+  },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+02:00",
+          "name": "Pizza",
+          "quantity": {
+            "value": 50,
+            "unit": "%"
+          },
+          "nutrients": {
+            "energy": {
+              "value": 640,
+              "unit": "kcal"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

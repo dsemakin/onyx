@@ -1,0 +1,26 @@
+{
+  "$schema": "https://example.invalid/onyx/v1/log.schema.json",
+  "format": "onyx",
+  "specVersion": "1.7.0",
+  "exportedAt": "2026-08-10T09:12:00+03:00",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Later Minor", "version": "3.0.0", "quirk": "unknown member" },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "mood": "unknown member",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+03:00",
+          "name": "Oats",
+          "nutrients": {
+            "energy": { "value": 389, "unit": "kcal" },
+            "selenium": { "value": 34, "unit": "ug" }
+          }
+        }
+      ]
+    }
+  ],
+  "hydration": [{ "observedAt": "2026-08-10T09:00:00+03:00", "value": { "value": 500, "unit": "mL" } }],
+  "extensions": { "com.example.tracker": { "blockVersion": 4 } }
+}

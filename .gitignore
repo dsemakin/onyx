@@ -1,0 +1,41 @@
+# Rust build output.
+/target
+**/target
+
+# The workspace Cargo.lock IS committed, deliberately: see docs/dependencies.md. Builds pass
+# --locked so a dependency is never picked up silently. Only the backup file is ignored.
+Cargo.lock.bak
+
+# fuzz/ is the exception. It is a development tool outside the workspace, nobody installs it,
+# and its dependencies reach no published artifact — so letting them float keeps it working
+# as libfuzzer tracks nightly, rather than freezing it against a compiler that has moved on.
+/fuzz/Cargo.lock
+
+# Node. This project has no npm dependencies; node_modules only ever appears because a
+# script installed Ajv transiently, and package-lock.json is that install's leftover.
+node_modules/
+/package-lock.json
+packages/npm/*.tgz
+
+# The WebAssembly module, built by `just wasm` from crates/onyx-wasm. Never committed:
+# a binary in the tree is a thing nobody can review.
+packages/npm/pkg/
+*.wasm
+
+# Python. examples/reader-py is run directly and caches bytecode beside itself.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Merge and patch leftovers, which are easy to commit by accident.
+*.orig
+*.rej
+
+# Editors and operating systems.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+

@@ -1,0 +1,15 @@
+{
+  "why": "People step on the scale more than once a day. The one that counts is the last by the clock, and here the earlier reading is written second — so an implementation that takes whichever came last in the array reports 82 instead of 80.",
+  "checks": {
+    "ordering": "The 21:00 weigh-in wins over the 07:00 one regardless of the order they appear in the array.",
+    "whyThisCaseExists": "Rust fixed this in an early round; the Python reader kept resolving by array position for six rounds afterwards, and no corpus case had two measurements on one day, so nothing noticed. The four implementations only cross-check each other on the cases the corpus actually contains."
+  },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entryCount": 1,
+      "energyKcal": 389,
+      "bodyMassKg": 80
+    }
+  ]
+}

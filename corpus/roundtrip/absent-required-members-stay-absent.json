@@ -1,0 +1,26 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "days": [
+    {
+      "entries": [
+        {
+          "name": "Oats"
+        }
+      ]
+    }
+  ],
+  "bodyMeasurements": [
+    {
+      "value": {
+        "value": 70,
+        "unit": "kg"
+      }
+    },
+    {
+      "type": "bodyMass"
+    }
+  ]
+}

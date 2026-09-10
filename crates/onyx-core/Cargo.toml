@@ -1,0 +1,18 @@
+[package]
+name = "onyx-core"
+description = "Reference engine for the Onyx interchange format: parse, preserve, validate, migrate."
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# tests/corpus.rs reads the repository's corpus/ directory, which is not part of the
+# published package. Shipping a test that cannot run is worse than shipping none.
+exclude = ["tests/"]
+
+[dependencies]

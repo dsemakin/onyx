@@ -1,0 +1,16 @@
+{
+  "why": "No vendor block is present, so this can only be restored from the portable layer. A consumer that only reads its own files has implemented a backup, not this format.",
+  "checks": {
+    "bodyMass": "Recorded in [lb_av]. A consumer must convert rather than trust the number.",
+    "dayAssignment": "The 07:00+02:00 weigh-in folds onto 2026-08-10 using the offset the timestamp carries, not the reader's local zone.",
+    "energy": "No energyConsumed is recorded, so the day's energy is the sum of its entries."
+  },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entryCount": 1,
+      "energyKcal": 389,
+      "bodyMassKg": 80.512645675
+    }
+  ]
+}

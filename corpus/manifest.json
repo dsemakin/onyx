@@ -1,0 +1,210 @@
+{
+  "manifestVersion": 1,
+  "specVersion": "1.0.0",
+  "cases": [
+    {
+      "file": "valid/minimal.json",
+      "group": "valid",
+      "spec": "3.1",
+      "expect": {
+        "warns": [
+          "document/missing-timezone"
+        ]
+      },
+      "description": "Only the four required members. Well-formed, though the absent timeZone is worth noting because consumers need it to fold measurements onto local days."
+    },
+    {
+      "file": "valid/unknown-members-at-every-level.json",
+      "group": "valid",
+      "spec": "2.3, 4",
+      "description": "A later minor with unknown members at every level and a foreign vendor namespace. Must be accepted, not merely tolerated."
+    },
+    {
+      "file": "valid/open-vocabulary-value.json",
+      "group": "valid",
+      "spec": "3.5",
+      "expect": {
+        "accepted": true
+      },
+      "description": "An unrecognised mealType. The vocabularies are open strings, so this validates against the schema and a consumer treats the value as absent rather than as an error. A closed enum would invalidate a document the moment a later MINOR added a value, which is the one place this format cannot afford to be closed."
+    },
+    {
+      "file": "valid/goal-type-outside-the-vocabulary.json",
+      "group": "valid",
+      "spec": "3.5",
+      "expect": {
+        "notes": ["vocabulary/unknown"]
+      },
+      "description": "A goal whose `type` v1.0.0 does not define. Vocabularies are open, so it is reported as a note and the document stands. This case exists because that message was the only finding in the engine no fixture could provoke — a guard was claimed to have verified it, and reintroducing the defect there left the whole suite green."
+    },
+    {
+      "file": "valid/portion-in-percent.json",
+      "group": "valid",
+      "spec": "3.4",
+      "expect": {
+        "warns": ["quantity/undefined-portion-unit"]
+      },
+      "description": "A portion of `50 %`. The schema's $defs/portion enum lists `%`, and §3.4 defines only a dimensional amount or `1` as a count of the servings `servingDescription` names — so this document is legal and means nothing. It is accepted with a warning, and this case exists because the three implementations previously disagreed about it: the schema accepted it, the Rust engine rejected it, and the Python reader accepted it silently. Nothing was checking, which is exactly the shape of the citation drift that took five rounds to find."
+    },
+    {
+      "file": "valid/atwater-mismatch.json",
+      "group": "valid",
+      "spec": "3.3",
+      "expect": {
+        "accepted": true,
+        "warns": [
+          "nutrients/atwater"
+        ]
+      },
+      "description": "A 30 g portion whose energy is per-portion while its macros were left per 100 g. Both halves are individually plausible, which is what makes this the silent error \u00a73.3 exists to prevent. Nothing in one document can prove which half is wrong, so it warns rather than rejects."
+    },
+    {
+      "file": "invalid/utc-normalised-timestamps.json",
+      "group": "invalid",
+      "spec": "2.6",
+      "expect": {
+        "rule": "time/utc-normalised"
+      },
+      "description": "Timestamps normalised to Z. The instant survives and the local wall clock does not, so neither the day an entry is filed under nor the local day a weigh-in folds onto can be recovered. The schema rejects it and the engine reports it."
+    },
+    {
+      "file": "invalid/utc-normalised-measurement.json",
+      "group": "invalid",
+      "spec": "2.6",
+      "expect": {
+        "rule": "time/utc-normalised"
+      },
+      "description": "The only Z in this document is a body measurement's observedAt; exportedAt carries a real offset. The case above would still pass if an implementation checked entries and never measurements, so this is what holds that half of the rule in place — and a weigh-in is exactly where the loss bites, since §3.6 folds it onto a local day by that very offset."
+    },
+    {
+      "file": "invalid/confidence-out-of-range.json",
+      "group": "invalid",
+      "spec": "3.5",
+      "expect": {
+        "rule": "entry/confidence-range"
+      },
+      "description": "A confidence of 90, which is a percentage that was never divided down. §3.5 defines the range as 0..1, so 90 is not high confidence but a number nothing can interpret — and anything weighting entries by it silently misweights this one by a factor of a hundred."
+    },
+    {
+      "file": "invalid/goal-in-the-wrong-dimension.json",
+      "group": "invalid",
+      "spec": "2.5",
+      "expect": {
+        "rule": "unit/dimension"
+      },
+      "description": "A target weight recorded in kcal. Goals were not checked at all until this case existed, so a goal in any unit at all passed while the identical mistake in a body measurement was caught."
+    },
+    {
+      "file": "invalid/newer-major.json",
+      "group": "invalid",
+      "spec": "4",
+      "expect": {
+        "rule": "document/unsupported-major"
+      },
+      "description": "A newer MAJOR may have changed meanings. Refusing is correct; misreading someone's history is not. Note this document is schema-valid \u2014 \u00a74 is not expressible in JSON Schema, which is why the corpus exists."
+    },
+    {
+      "file": "invalid/spec-version-with-a-leading-zero.json",
+      "group": "invalid",
+      "spec": "4",
+      "expect": {
+        "rule": "document/malformed-version",
+        "schemaValid": true
+      },
+      "description": "A specVersion of 01.0.0. \u00a74 says specVersion is semver, and semver gives each version one spelling: no sign, no leading zero. The schema's pattern is \\d+ and cannot say that, so this document is schema-valid and still malformed \u2014 the same gap as newer-major. This case exists because the engine was tightened to semver while the Python reader and the schema still accepted the leading zero, and nothing in the corpus told the three apart."
+    },
+    {
+      "file": "invalid/not-an-onyx-document.json",
+      "group": "invalid",
+      "spec": "2.2",
+      "expect": {
+        "rule": "document/not-onyx"
+      },
+      "description": "Identity comes from `format`, never from the file name or `$schema`."
+    },
+    {
+      "file": "invalid/quantity-without-a-value.json",
+      "group": "invalid",
+      "spec": "3.4",
+      "expect": {
+        "rule": "quantity/incomplete"
+      },
+      "description": "An energy quantity carrying a unit and no number. The engine once read this as a recorded 0 kcal and wrote the invented zero back out, so the day reported as a confident fast rather than as a document that could not be read. Absent is not zero."
+    },
+    {
+      "file": "invalid/unit-not-ucum.json",
+      "group": "invalid",
+      "spec": "2.5",
+      "expect": {
+        "rule": "unit/dimension"
+      },
+      "description": "`calories` and `grams` are invented unit strings. The schema catches these two, because nutrient units are typed by dimension with an enum — this case is here for the engine's message and for implementations that do not run the schema at all. The unit rule only escapes the schema where the dimension depends on an open vocabulary; see invalid/goal-in-the-wrong-dimension.json."
+    },
+    {
+      "file": "invalid/duplicate-day.json",
+      "group": "invalid",
+      "spec": "3.2",
+      "expect": {
+        "rule": "day/duplicate-date"
+      },
+      "description": "Two records for one local day, with different totals. A consumer has no way to decide which one is that day's history."
+    },
+    {
+      "file": "roundtrip/unknown-members-survive.json",
+      "group": "roundtrip",
+      "spec": "2.3",
+      "description": "Parse then serialize must preserve every member and be idempotent. A processor that merely ignored unknown members would strip data on the way through."
+    },
+    {
+      "file": "roundtrip/present-but-empty-members-survive.json",
+      "group": "roundtrip",
+      "spec": "2.3",
+      "expect": {
+        "schemaValid": false
+      },
+      "description": "Required members that are present and empty. The document is wrong and the engine says so — but `\"\"` is what the producer wrote, and a processor that answers by deleting it has edited the file rather than reported it. The companion case above covers members that are absent; nothing covered present-but-empty, and the two are opposite failures of the same guarantee."
+    },
+    {
+      "file": "roundtrip/absent-required-members-stay-absent.json",
+      "group": "roundtrip",
+      "spec": "2.3",
+      "expect": {
+        "schemaValid": false
+      },
+      "description": "A malformed document missing producer.name, a day's date, an entry's loggedAt, and a measurement's observedAt and type. Every one of them is required, so the document is wrong and the engine says so — but it must not answer by inventing them. Writing `\"date\": \"\"` back is not preservation, it is editing someone's file to look like it said something it never said."
+    },
+    {
+      "file": "roundtrip/ragged-array-survives.json",
+      "group": "roundtrip",
+      "spec": "2.3",
+      "expect": {
+        "schemaValid": false
+      },
+      "description": "An entries array with a string among the objects. The engine cannot read that element into its typed model, so it must not claim the array at all — the old code filtered the stray element out and wrote a two-element array back, losing it. A processor that shortens an array it did not understand is destroying data, not ignoring it. The document is deliberately schema-invalid: preservation is not conditional on validity, and a processor handling a broken file is exactly when losing data matters most."
+    },
+    {
+      "file": "roundtrip/producer-export-with-vendor-block.json",
+      "group": "roundtrip",
+      "spec": "3.6, 3.7",
+      "description": "The shape a real producer writes: subject, goals, days, measurements, and a vendor block whose values are stringified app storage. The engine must carry the block through untouched without ever parsing inside it."
+    },
+    {
+      "dir": "consumer/foreign-document-no-vendor-block",
+      "group": "consumer",
+      "spec": "3.5, 3.6, 5",
+      "description": "Restoring from the portable layer alone, converting mass units, and folding a weigh-in onto its local day using the offset its own timestamp carries. An implementation that passes every other case but fails this one has built a backup format, not an interchange format."
+    },
+    {
+      "dir": "consumer/two-weigh-ins-on-one-day",
+      "group": "consumer",
+      "spec": "3.6",
+      "description": "Two weigh-ins on one local day, the later one written first. Resolving by array position gives 82 kg; resolving by the clock gives 80. Rust settled this early; the Python reader went on resolving by position, and no case in the corpus had two same-day measurements, so the divergence sat between two of the four implementations unnoticed."
+    },
+    {
+      "dir": "consumer/measurement-folds-by-its-own-offset",
+      "group": "consumer",
+      "spec": "3.6",
+      "description": "A subject whose home timeZone is Europe/Berlin weighs in at 00:30 while travelling in Tokyo. Folding by the timestamp's own offset puts the weigh-in on 2026-08-10; converting to UTC, or reading it in the document's timeZone, both put it on 2026-08-09 — where a day already exists to absorb it silently. The case above cannot tell those apart, because there the measurement's offset happens to equal the document's timeZone."
+    }
+  ]
+}

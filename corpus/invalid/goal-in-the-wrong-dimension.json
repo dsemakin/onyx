@@ -1,0 +1,18 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "producer": {
+    "name": "Targets Grams"
+  },
+  "goals": [
+    {
+      "type": "targetWeight",
+      "value": {
+        "value": 72,
+        "unit": "kcal"
+      }
+    }
+  ]
+}

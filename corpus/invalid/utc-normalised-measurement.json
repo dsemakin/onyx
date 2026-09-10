@@ -1,0 +1,19 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-10T09:00:00+09:00",
+  "timeZone": "Asia/Tokyo",
+  "producer": {
+    "name": "Normalises Only Measurements"
+  },
+  "bodyMeasurements": [
+    {
+      "observedAt": "2026-08-10T00:30:00Z",
+      "type": "bodyMass",
+      "value": {
+        "value": 70.5,
+        "unit": "kg"
+      }
+    }
+  ]
+}

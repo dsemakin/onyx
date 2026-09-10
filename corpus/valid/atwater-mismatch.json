@@ -1,0 +1,25 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T12:00:00+03:00",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Portion Confusion" },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+03:00",
+          "name": "Oats",
+          "quantity": { "value": 30, "unit": "g" },
+          "nutrients": {
+            "energy": { "value": 117, "unit": "kcal" },
+            "protein": { "value": 16.9, "unit": "g" },
+            "carbohydrate": { "value": 66, "unit": "g" },
+            "fat": { "value": 6.9, "unit": "g" }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+name: Bug report
+description: The engine, CLI or npm package behaves incorrectly.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: document
+    attributes:
+      label: Minimal document that reproduces it
+      description: >
+        The smallest ONYX document showing the problem. Please remove any real personal
+        data — a diary is sensitive, and a synthetic reproduction is just as useful.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `onyx --version`, or the crate version.
+    validations:
+      required: true
+  - type: checkboxes
+    id: corpus
+    attributes:
+      label: Conformance
+      options:
+        - label: I am willing to contribute this as a case in `corpus/` (no Rust required)

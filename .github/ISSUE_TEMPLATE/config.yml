@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/dsemakin/onyx/discussions
+    about: Open a discussion for anything that is not a bug, a spec change or a conformance case.
+  - name: Security vulnerability
+    url: https://github.com/dsemakin/onyx/security/advisories/new
+    about: Report privately. Please do not open a public issue.

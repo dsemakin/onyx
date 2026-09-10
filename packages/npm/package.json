@@ -1,0 +1,39 @@
+{
+  "name": "@dsemakin/onyx",
+  "version": "1.0.0",
+  "description": "Validate Onyx diaries with zero install. Runs locally; nothing is uploaded.",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsemakin/onyx.git",
+    "directory": "packages/npm"
+  },
+  "homepage": "https://github.com/dsemakin/onyx",
+  "main": "lib/onyx-wasm.js",
+  "bin": {
+    "onyx": "bin/onyx.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "pkg/",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "nutrition",
+    "interchange",
+    "health",
+    "validator",
+    "onyx"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/cli.mjs"
+  }
+}

@@ -1,0 +1,5 @@
+# Pinned so every contributor, CI job and coding agent compiles with the same
+# toolchain. The MSRV in Cargo.toml is tested separately in CI.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]

@@ -1,0 +1,179 @@
+name: CI
+
+# Third-party actions are themselves a maintenance liability: they deprecate runtimes,
+# change inputs, and go unmaintained. Everything here that can be a shell command is one.
+# rustup and the GitHub CLI are preinstalled on the runners. Only actions/checkout is
+# used, and it is first-party.
+#
+# There is no build cache either. With two dependencies a cold build is quick, which is
+# one of the things a small dependency tree buys.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # A weekly canary. Most of this repository has no dependencies, so the things that rot
+  # are external: a nightly toolchain moving under fuzz/, a runner image changing, an
+  # action deprecating. None of those are triggered by a push.
+  schedule:
+    - cron: "0 5 * * 1"
+
+# Nothing here writes to the repository. Said explicitly, because the default for a
+# workflow without this block is whatever the repository's default happens to be — and
+# several jobs run third-party installers (`cargo install`, `npm install`) whose blast
+# radius is exactly this token.
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Format, lint and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+          rustc --version
+      # --locked everywhere: a build must use the committed Cargo.lock and never silently
+      # resolve a newer dependency. If the lock is out of date, that is a change someone
+      # should make deliberately, in a commit.
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo test --locked --workspace --all-features
+
+  msrv:
+    name: Minimum supported Rust version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Kept in step with rust-version in Cargo.toml. Bumping it is a breaking change for
+      # downstream crates, so it is tested rather than assumed.
+      - run: |
+          rustup toolchain install 1.85.0 --profile minimal
+          rustup default 1.85.0
+      - run: cargo check --locked --workspace --all-features
+
+  reference-reader:
+    name: Python reader against the corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Python is preinstalled on the runners, and the reader uses only the standard
+      # library. This is what keeps "the spec is implementable from spec/ and corpus/
+      # alone" a fact rather than a claim.
+      - run: python3 examples/reader-py/run_corpus.py
+  fuzz-targets:
+    name: Fuzz targets still compile
+    # fuzz/ is outside the workspace on purpose — it needs nightly and pulls in
+    # libfuzzer-sys, neither of which should touch the stable, dependency-free path. The
+    # cost of that isolation is that `cargo test --workspace` cannot see it, so the targets
+    # can silently stop compiling when onyx-core's API moves under them.
+    #
+    # `cargo check` is enough and is far lighter than `cargo fuzz build`: no cargo-fuzz to
+    # install, no libFuzzer to link, no sanitizers. It catches exactly the failure that
+    # matters — a renamed function or a changed signature.
+    #
+    # Runs on every push rather than behind a paths filter: it is a single cargo check and
+    # skipping it is how the thing it guards gets forgotten.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install nightly --profile minimal
+      - run: cargo +nightly check --manifest-path fuzz/Cargo.toml
+
+  audit:
+    name: Advisory database
+    runs-on: ubuntu-latest
+    # `just audit` existed and nothing ran it. With no dependencies this should stay quiet
+    # forever — which is exactly why it must be wired up: the day it is not quiet is the day
+    # something arrived that nobody chose.
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: cargo install cargo-audit --locked
+      - run: cargo audit --deny warnings
+
+  wasm:
+    name: Corpus through the wasm binding
+    runs-on: ubuntu-latest
+    # The binding was previously built only inside release.yml, so a change that broke it
+    # merged cleanly and surfaced during a release — beside an irreversible publish.
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: rustup target add wasm32-unknown-unknown
+      - name: Build
+        run: |
+          cargo build --locked --release --package onyx-wasm --target wasm32-unknown-unknown
+          mkdir -p packages/npm/pkg
+          cp target/wasm32-unknown-unknown/release/onyx_wasm.wasm packages/npm/pkg/onyx.wasm
+      - name: Run the corpus through it
+        working-directory: packages/npm
+        run: npm test
+
+  repository:
+    name: Repository consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/check-links.mjs
+      - run: node scripts/vendor.mjs --check
+      # A crate that reaches outside its own directory builds here and fails once
+      # published, so packaging is verified before a tag rather than after one.
+      - run: cargo package --locked --package onyx-core
+
+  schema:
+    name: Corpus against the JSON Schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Node is preinstalled on the runners, so no setup action is needed. Ajv is not a
+      # dependency of this project; it is installed transiently and nothing is committed.
+      - run: npm install --no-save --no-package-lock --no-audit --no-fund ajv@8
+      - run: node scripts/check-schema.mjs
+
+  spec-unchanged:
+    name: Published spec is unmodified
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # spec/v1 matches documents already in users' hands. It is never edited in place;
+      # new versions land as new directories. See GOVERNANCE.md.
+      # Runs on pushes too. This workflow triggers on both, and the guard previously only
+      # applied to pull requests — leaving a direct push to main, the one path with no
+      # review in front of it, entirely unwatched.
+      - name: Reject in-place edits to a published spec version
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          # A new branch, or a force-push whose base is gone, has nothing to compare against.
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]              || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "no comparable base commit; nothing to check"
+            exit 0
+          fi
+          if git diff --name-only "$base" HEAD -- spec/v1/ | grep -q .; then
+            echo "::error::spec/v1/ is published and must not be edited in place."
+            git diff --name-only "$base" HEAD -- spec/v1/
+            exit 1
+          fi
+          echo "spec/v1/ untouched"

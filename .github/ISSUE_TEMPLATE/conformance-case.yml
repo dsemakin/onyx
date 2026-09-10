@@ -1,0 +1,40 @@
+name: Conformance case
+description: A document the engine handles incorrectly, or a rule with no test behind it.
+labels: [conformance]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Adding a conformance case needs no Rust — it is a JSON file in `corpus/` plus an
+        entry in `corpus/manifest.json`. Pull requests are very welcome; this issue type
+        exists for when you would rather just report it.
+  - type: dropdown
+    id: group
+    attributes:
+      label: Which group
+      options:
+        - valid — must be accepted
+        - invalid — must be rejected
+        - consumer — document plus the state a consumer must restore
+        - roundtrip — must survive parse/serialize byte-identically
+    validations:
+      required: true
+  - type: textarea
+    id: document
+    attributes:
+      label: The document
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected outcome
+      description: Accepted, or rejected with which error? For consumer cases, the restored state.
+    validations:
+      required: true
+  - type: input
+    id: rule
+    attributes:
+      label: Specification section
+      description: Which section of spec/v1/SPEC.md this exercises, if you know.

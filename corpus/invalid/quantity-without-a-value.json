@@ -1,0 +1,25 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "producer": {
+    "name": "Drops The Number"
+  },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+02:00",
+          "name": "Oats",
+          "nutrients": {
+            "energy": {
+              "unit": "kcal"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

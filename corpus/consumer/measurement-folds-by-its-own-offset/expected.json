@@ -1,0 +1,22 @@
+{
+  "why": "The subject lives in Europe/Berlin and is travelling in Tokyo. They step on the scale at 00:30 local, half an hour into 10 August where they are standing. §3.6 folds a weigh-in onto the local day of the timestamp's OWN offset, so it belongs to 2026-08-10.",
+  "checks": {
+    "dayAssignment": "Both wrong readings collapse to the same visible error. Converting to UTC gives 2026-08-09T15:30Z, and reading it in the document's timeZone gives 2026-08-09T17:30+02:00 — either way the mass lands on the existing 2026-08-09 day and this case restores one day instead of two.",
+    "timeZoneIsNotTheFoldingRule": "`timeZone` is the subject's home zone and is deliberately NOT Asia/Tokyo here. A consumer that folds by the document's timeZone rather than by each timestamp's offset cannot pass this case.",
+    "dayWithNoFood": "2026-08-10 has no entries at all. A weigh-in alone still makes a day real, so it must appear with entryCount 0 and no energy."
+  },
+  "days": [
+    {
+      "date": "2026-08-09",
+      "entryCount": 1,
+      "energyKcal": 620,
+      "bodyMassKg": null
+    },
+    {
+      "date": "2026-08-10",
+      "entryCount": 0,
+      "energyKcal": null,
+      "bodyMassKg": 70.5
+    }
+  ]
+}

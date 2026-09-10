@@ -1,0 +1,42 @@
+name: Specification change
+description: Propose adding, changing or clarifying something in the format itself.
+labels: [spec]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Format changes follow the process in GOVERNANCE.md. Published versions are never
+        edited in place, so please think about existing documents before proposing.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What cannot be expressed today, or what is ambiguous today.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - PATCH — editorial or clarification only, no member changes
+        - MINOR — adds optional members, existing documents stay valid
+        - MAJOR — changes the meaning of an existing member
+    validations:
+      required: true
+  - type: textarea
+    id: existing
+    attributes:
+      label: Effect on documents already in the wild
+      description: >
+        Would any existing document become invalid, or be read differently? If so,
+        what is the migration story?
+    validations:
+      required: true
+  - type: textarea
+    id: prior-art
+    attributes:
+      label: Prior art
+      description: >
+        How do FHIR, Open mHealth, Health Connect, HealthKit or Open Food Facts handle
+        this? Borrowing a solved vocabulary beats inventing one.

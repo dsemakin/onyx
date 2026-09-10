@@ -1,0 +1,36 @@
+Onyx is licensed in two parts. The full texts are in LICENSES/.
+
+
+CODE — crates/, packages/, scripts/, examples/
+
+    MIT OR Apache-2.0, at your option.
+
+    LICENSES/MIT.txt
+    LICENSES/Apache-2.0.txt
+
+    "OR" means you choose one; you do not have to satisfy both. Apache-2.0 carries an
+    express patent grant, which MIT does not. MIT is offered alongside it because
+    Apache-2.0 is incompatible with GPLv2, and a GPLv2 project should still be able to
+    use this code.
+
+
+THE FORMAT — spec/, corpus/, migrations/, docs/
+
+    CC0-1.0, a public domain dedication.
+
+    LICENSES/CC0-1.0.txt
+
+    The specification, the conformance corpus and the migration manifests carry no
+    conditions at all. Implement them freely, fork them, rename them. An implementer has
+    to copy the test fixtures to prove conformance, and any attribution requirement would
+    be friction on exactly the thing this project wants people to do.
+
+    CC0 waives copyright but does not grant patent rights, which is why it covers the
+    data and never the code.
+
+
+Published crates carry their own copies of the MIT and Apache-2.0 texts, because cargo
+packages only what lives inside a crate directory. `node scripts/vendor.mjs --check`
+verifies those copies are byte-identical to the originals here, and CI runs it.
+
+Copyright (c) 2026 Dan Semakin and the Onyx contributors.

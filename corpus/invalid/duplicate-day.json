@@ -1,0 +1,11 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T12:00:00+03:00",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Merged Badly" },
+  "days": [
+    { "date": "2026-08-10", "energyConsumed": { "value": 1800, "unit": "kcal" } },
+    { "date": "2026-08-10", "energyConsumed": { "value": 2100, "unit": "kcal" } }
+  ]
+}

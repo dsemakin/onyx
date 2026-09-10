@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: Onyx
+abstract: >-
+  An interchange format for a personal food and body-weight diary, with a
+  conformance corpus and a reference engine. Addresses the absence of any
+  interchange format for consumer nutrition logging: Open mHealth and
+  IEEE 1752 cover body weight, activity and sleep across hundreds of schemas
+  and define none for food, and HL7 FHIR NutritionIntake is modelled on
+  inpatient tray monitoring rather than self-recorded diaries.
+message: >-
+  If you reference this specification in research or in another
+  specification, please cite it as below.
+type: software
+authors:
+  - family-names: Semakin
+    given-names: Dan
+repository-code: https://github.com/dsemakin/onyx
+url: https://github.com/dsemakin/onyx
+license:
+  - MIT
+  - Apache-2.0
+  - CC0-1.0
+version: 1.0.0
+keywords:
+  - nutrition
+  - food diary
+  - interchange format
+  - data portability
+  - health informatics
+  - JSON Schema

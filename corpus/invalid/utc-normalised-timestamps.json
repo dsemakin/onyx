@@ -1,0 +1,19 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00Z",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Normalises To UTC" },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T05:30:00Z",
+          "name": "Oats",
+          "nutrients": { "energy": { "value": 389, "unit": "kcal" } }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "producer": {
+    "name": "Has A Goal We Do Not Know"
+  },
+  "goals": [
+    {
+      "type": "bodyFatTarget",
+      "value": {
+        "value": 18,
+        "unit": "%"
+      }
+    },
+    {
+      "type": "targetWeight",
+      "value": {
+        "value": 78,
+        "unit": "kg"
+      }
+    }
+  ]
+}
