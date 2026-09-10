@@ -1,0 +1,6 @@
+# Every file is stored and checked out with LF endings, whatever a contributor's
+# core.autocrlf says. Two guards in this repository compare bytes, not lines: the
+# vendored-licence check and the rule that spec/v1/ stays identical to what is
+# published, and neither should depend on the git settings of the machine that
+# made the commit.
+* text=auto eol=lf
