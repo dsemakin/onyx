@@ -12,6 +12,10 @@ independently from here and are expected to diverge.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.0.0] - 2026-09-11
+
 Initial release. There is no earlier version to compare against, so this entry describes
 what ships rather than what changed. Pre-release history lives in git.
 
@@ -158,4 +162,5 @@ what ships rather than what changed. Pre-release history lives in git.
 - `corpus/roundtrip/` is synthetic. Proving preservation against real, anonymised producer
   exports is the outstanding piece, and it needs a producer rather than this repository.
 
-[Unreleased]: https://github.com/dsemakin/onyx/commits/main
+[Unreleased]: https://github.com/dsemakin/onyx/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/dsemakin/onyx/releases/tag/v1.0.0
