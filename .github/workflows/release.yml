@@ -29,7 +29,7 @@ jobs:
     name: Verify before publishing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       - run: cargo test --locked --workspace --all-features
 
@@ -41,7 +41,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Pushing a tag does not create a release; `gh release upload` needs one to exist.
       # Without this the binary matrix fails with "release not found" AFTER the registry
       # publishes below have already happened, and those cannot be taken back.
@@ -67,7 +67,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       # No wasm-pack and no wasm-bindgen: wasm32-unknown-unknown is a rustup target and
       # the ABI is hand-written, so there is no tool version to keep in step.
@@ -114,7 +114,7 @@ jobs:
           - { os: macos-latest, target: aarch64-apple-darwin }
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install stable --profile minimal && rustup default stable
       - run: rustup target add ${{ matrix.target }}
 
