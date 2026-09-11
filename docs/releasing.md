@@ -77,15 +77,23 @@ treat the dry run below as the actual gate rather than a formality.
    ```
    and download one binary from the release page and run `onyx --version`.
 
-## Secrets the workflow needs
+## How the workflow authenticates
 
-| Secret | Where to get it | Used for |
-|---|---|---|
-| `NPM_TOKEN` | npmjs.com → Access Tokens → Granular, publish scope, limited to `@dsemakin` | Publishing the npm package |
+There are no secrets. `GITHUB_TOKEN` is provided automatically and is what creates the
+release and uploads the binaries. The npm job uses **trusted publishing**: GitHub issues it
+a short-lived OIDC token that proves it is running in `dsemakin/onyx` from `release.yml`,
+and npm accepts that in place of a credential. Nothing is stored, nothing expires, and every
+version published this way carries a provenance attestation that anyone can verify.
 
-`GITHUB_TOKEN` is provided automatically and is what creates the release and uploads the
-binaries. Granular npm tokens expire; when a release fails at the publish step with an
-authentication error, that is the first thing to check.
+The trust relationship lives on npmjs.com, under the package: Packages → `@dsemakin/onyx`
+→ Settings → Trusted publishing → GitHub Actions, with the organisation or user
+`dsemakin`, the repository `onyx`, the workflow filename `release.yml`, and no environment.
+If a publish fails with an authentication error, that configuration is the first thing to
+check, and the second is that the workflow file was not renamed.
+
+npm's granular access tokens are deliberately not used. Since mid-2026 a token that bypasses
+two-factor authentication cannot perform sensitive package actions, and from January 2027
+it cannot publish directly at all.
 
 ## Re-running a failed release
 
@@ -114,6 +122,22 @@ day it is wanted is a workflow change rather than a repair. Two things to know o
   `--no-verify` does not avoid it. This is true of every multi-crate workspace.
 
 ## The first release also needs
+
+**The first version published by hand.** Trusted publishing can only be configured on a
+package that already exists on the registry, and so can staged publishing; there is no way
+to set either up in advance. So the very first version is published from a maintainer's
+machine, once, with an interactive login and a two-factor code:
+
+```sh
+just wasm
+cd packages/npm && npm test && npm publish --dry-run   # read the file list
+npm login
+npm publish
+```
+
+Immediately afterwards, configure the trusted publisher on the new package's settings page
+as described above. From then on every version comes from the tag. The one thing the
+hand-published version lacks is a provenance attestation, since it was not built in CI.
 
 **The npm scope.** The package is `@dsemakin/onyx`. On npm the scope matching your username
 is yours automatically; any other scope is an organisation that has to exist before the

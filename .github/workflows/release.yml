@@ -2,8 +2,13 @@ name: Release
 
 # Publishes on a version tag. Nothing here runs on a normal push.
 #
-# Required secret:
-#   NPM_TOKEN   npm granular token with publish rights on the @dsemakin scope
+# No secrets. The npm job authenticates by trusted publishing: GitHub issues the job an
+# OIDC token proving it runs in this repository from this file, and npm exchanges it for
+# a credential that lives only as long as the job. The trust is configured on npmjs.com
+# under the package's settings (owner `dsemakin`, repository `onyx`, workflow
+# `release.yml`), and it can only be configured once the package exists — which is why
+# the very first version was published by hand from a maintainer's machine. Publishes
+# made this way carry a provenance attestation automatically.
 #
 # The crates are deliberately not published to crates.io. The binaries below deliver the
 # CLI, and the wasm module carries the engine to JavaScript, so nothing in the first
@@ -63,6 +68,9 @@ jobs:
     name: Publish to npm
     # Deliberately after the binaries. npm is a one-way door, so everything that can
     # still fail is made to fail first.
+    permissions:
+      contents: read
+      id-token: write  # lets the job mint the OIDC token npm verifies
     needs: binaries
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
@@ -80,13 +88,15 @@ jobs:
       - name: Run the corpus through the binding
         working-directory: packages/npm
         run: npm test
+      # Trusted publishing needs a newer npm than the runner's Node bundles. Installing npm
+      # with npm is the one install here that cannot introduce a version skew with itself.
+      - name: Use an npm that supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          echo "node $(node --version), npm $(npm --version)"
       - name: Publish
         working-directory: packages/npm
         run: |
-          # The trap, not a trailing `rm`: the step aborts on a failed publish, and the
-          # plain version left a file holding a live npm token on the runner.
-          trap 'rm -f .npmrc' EXIT
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           name="$(node -p 'require("./package.json").name')"
           version="$(node -p 'require("./package.json").version')"
           if npm view "${name}@${version}" version >/dev/null 2>&1; then
@@ -94,8 +104,6 @@ jobs:
           else
             npm publish
           fi
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   binaries:
     name: Binary (${{ matrix.target }})
