@@ -1,0 +1,222 @@
+{
+  "$schema": "https://www.schemastore.org/onyx-v1.json",
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-12T19:42:08+03:00",
+  "timeZone": "Asia/Jerusalem",
+  "producer": {
+    "name": "Burnin",
+    "version": "1.2.1",
+    "platform": "android"
+  },
+  "subject": {
+    "sex": "female",
+    "age": {
+      "value": 41,
+      "unit": "a"
+    },
+    "height": {
+      "value": 172,
+      "unit": "cm"
+    },
+    "preferredUnits": {
+      "mass": "kg",
+      "energy": "kcal"
+    }
+  },
+  "goals": [
+    {
+      "type": "targetWeight",
+      "value": {
+        "value": 63,
+        "unit": "kg"
+      }
+    },
+    {
+      "type": "weightDirection",
+      "direction": "loss"
+    }
+  ],
+  "days": [
+    {
+      "date": "2026-08-10",
+      "energyTarget": {
+        "value": 2180,
+        "unit": "kcal"
+      },
+      "energyConsumed": {
+        "value": 1687,
+        "unit": "kcal"
+      },
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:35:00+03:00",
+          "mealType": "breakfast",
+          "name": "Rolled oats",
+          "identifiers": {
+            "fdcId": 169705
+          },
+          "quantity": {
+            "value": 1,
+            "unit": "1"
+          },
+          "servingDescription": "1 × 80g",
+          "nutrients": {
+            "energy": {
+              "value": 284,
+              "unit": "kcal"
+            },
+            "protein": {
+              "value": 11,
+              "unit": "g"
+            },
+            "carbohydrate": {
+              "value": 48,
+              "unit": "g"
+            },
+            "fat": {
+              "value": 6,
+              "unit": "g"
+            }
+          },
+          "source": "database"
+        },
+        {
+          "loggedAt": "2026-08-10T13:10:00+03:00",
+          "mealType": "snack",
+          "name": "Nutella",
+          "identifiers": {
+            "gtin": "03017620422003",
+            "offId": "3017620422003"
+          },
+          "quantity": {
+            "value": 1,
+            "unit": "1"
+          },
+          "servingDescription": "1 × 37g",
+          "nutrients": {
+            "energy": {
+              "value": 208,
+              "unit": "kcal"
+            },
+            "protein": {
+              "value": 2,
+              "unit": "g"
+            },
+            "carbohydrate": {
+              "value": 21,
+              "unit": "g"
+            },
+            "fat": {
+              "value": 12,
+              "unit": "g"
+            }
+          },
+          "source": "barcode"
+        },
+        {
+          "loggedAt": "2026-08-10T15:40:00+03:00",
+          "mealType": "lunch",
+          "name": "Hummus and pita",
+          "identifiers": {
+            "offId": "20221126"
+          },
+          "quantity": {
+            "value": 1,
+            "unit": "1"
+          },
+          "servingDescription": "1 × plate",
+          "nutrients": {
+            "energy": {
+              "value": 495,
+              "unit": "kcal"
+            },
+            "protein": {
+              "value": 16,
+              "unit": "g"
+            },
+            "carbohydrate": {
+              "value": 58,
+              "unit": "g"
+            },
+            "fat": {
+              "value": 21,
+              "unit": "g"
+            }
+          },
+          "source": "database"
+        },
+        {
+          "loggedAt": "2026-08-10T21:05:00+03:00",
+          "mealType": "dinner",
+          "name": "Vegetable stew",
+          "quantity": {
+            "value": 1.5,
+            "unit": "1"
+          },
+          "servingDescription": "bowl",
+          "nutrients": {
+            "energy": {
+              "value": 700,
+              "unit": "kcal"
+            }
+          },
+          "source": "estimated",
+          "confidence": 0.58,
+          "note": "guessed the oil"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "energyTarget": {
+        "value": 2180,
+        "unit": "kcal"
+      },
+      "energyConsumed": {
+        "value": 0,
+        "unit": "kcal"
+      },
+      "note": "fasted"
+    },
+    {
+      "date": "2026-08-12",
+      "energyTarget": {
+        "value": 2240,
+        "unit": "kcal"
+      }
+    }
+  ],
+  "bodyMeasurements": [
+    {
+      "observedAt": "2026-08-10T06:00:00+03:00",
+      "type": "bodyMass",
+      "value": {
+        "value": 68.4,
+        "unit": "kg"
+      }
+    },
+    {
+      "observedAt": "2026-08-11T06:00:00+03:00",
+      "type": "bodyMass",
+      "value": {
+        "value": 68.2,
+        "unit": "kg"
+      }
+    }
+  ],
+  "extensions": {
+    "ltd.bein.burnin": {
+      "blockVersion": 1,
+      "entries": {
+        "USER": "{\"height\":172,\"weight\":68,\"age\":41,\"gender\":false,\"createdAt\":\"2026-05-03T21:00:00.000Z\",\"calorieNeed\":2180,\"initialTDEE\":2180,\"currentTDEE\":2240,\"tdeeConfidenceLow\":1904,\"tdeeConfidenceHigh\":2576,\"metabolicTrend\":\"stable\",\"goalType\":\"loss\",\"targetWeight\":63,\"targetCalorieBalance\":-400,\"lastTDEEUpdate\":\"2026-08-12T06:20:11.412Z\",\"tdeeDataQuality\":\"medium\",\"tdeeWindowDays\":14,\"tdeeDaysWithCompleteData\":11,\"unitSystem\":\"metric\"}",
+        "BURNIN_TDEE_HISTORY": "[{\"date\":\"2026-08-10T06:02:44.881Z\",\"estimatedTDEE\":2180,\"confidenceLow\":1853,\"confidenceHigh\":2507,\"windowDays\":7,\"dataQuality\":\"low\",\"smoothedWeight\":68.4,\"trend\":\"stable\",\"daysWithCompleteData\":4,\"engineVersion\":2},{\"date\":\"2026-08-12T06:20:11.412Z\",\"estimatedTDEE\":2240,\"confidenceLow\":1904,\"confidenceHigh\":2576,\"windowDays\":14,\"dataQuality\":\"medium\",\"smoothedWeight\":68.1,\"trend\":\"stable\",\"daysWithCompleteData\":11,\"engineVersion\":2}]",
+        "DAY-Mon Aug 10 2026": "{\"date\":\"2026-08-10T03:00:00.000Z\",\"caloriesConsumed\":1687,\"weight\":68.4,\"smoothedWeight\":68.4,\"runningTDEE\":2180,\"meals\":[{\"type\":\"Breakfast\",\"time\":\"2026-08-10T05:35:00.000Z\",\"calories\":284,\"foodName\":\"Rolled oats\",\"servingDescription\":\"1 × 80g\",\"quantity\":1,\"fdcId\":169705,\"provenance\":\"db-match\",\"protein\":11,\"carbs\":48,\"fat\":6},{\"type\":\"Snack\",\"time\":\"2026-08-10T10:10:00.000Z\",\"calories\":208,\"foodName\":\"Nutella\",\"servingDescription\":\"1 × 37g\",\"quantity\":1,\"gtin\":\"03017620422003\",\"offId\":\"3017620422003\",\"provenance\":\"barcode\",\"protein\":2,\"carbs\":21,\"fat\":12},{\"type\":\"Lunch\",\"time\":\"2026-08-10T12:40:00.000Z\",\"calories\":495,\"foodName\":\"Hummus and pita\",\"servingDescription\":\"1 × plate\",\"quantity\":1,\"offId\":\"20221126\",\"provenance\":\"db-match\",\"protein\":16,\"carbs\":58,\"fat\":21},{\"type\":\"Dinner\",\"time\":\"2026-08-10T18:05:00.000Z\",\"calories\":700,\"foodName\":\"Vegetable stew\",\"servingDescription\":\"bowl\",\"quantity\":1.5,\"provenance\":\"ai-estimate\",\"confidence\":0.58,\"note\":\"guessed the oil\"}]}",
+        "DAY-Tue Aug 11 2026": "{\"date\":\"2026-08-11T03:00:00.000Z\",\"caloriesConsumed\":0,\"weight\":68.2,\"meals\":[],\"notes\":\"fasted\"}",
+        "DAY-Wed Aug 12 2026": "{\"date\":\"2026-08-12T03:00:00.000Z\",\"meals\":[]}",
+        "SAVED_MEALS": "[{\"key\":\"meal-1754812800000\",\"name\":\"Usual breakfast\",\"totalCalories\":284,\"createdAt\":1754812800000,\"items\":[{\"foodName\":\"Rolled oats\",\"calories\":284,\"quantity\":1,\"servingDescription\":\"1 × 80g\",\"fdcId\":169705,\"protein\":11,\"carbs\":48,\"fat\":6}]}]",
+        "NOTIFICATION_PREFERENCES": "{\"permissionAsked\":true,\"slots\":{\"weighin\":{\"enabled\":true,\"hour\":7,\"minute\":30},\"checkin\":{\"enabled\":true,\"hour\":20,\"minute\":0}}}"
+      }
+    }
+  }
+}

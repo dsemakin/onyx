@@ -1,8 +1,11 @@
 name: Spec drift
 
-# The schema in this repository must stay byte-identical to the one served at the
-# canonical URL, because documents in the wild point at that URL. This runs weekly
-# rather than on every push, since it depends on a third party being reachable.
+# The schema in this repository must stay the same schema as the one served at the
+# canonical URL, because documents in the wild point at that URL. "The same" is judged
+# as JSON, not as bytes: SchemaStore runs its own formatter over contributed files, which
+# reorders keys ($-prefixed ones first) and rewraps lines, and neither changes what the
+# schema means. This runs weekly rather than on every push, since it depends on a third
+# party being reachable.
 
 # The weekly schedule is commented out until the schema is registered with
 # SchemaStore; until then the URL 404s and this would fail every Monday for no
@@ -27,10 +30,23 @@ jobs:
         env:
           # Configuration, never hardcoded in the engine. This URL will move.
           CANONICAL_URL: https://www.schemastore.org/onyx-v1.json
-      - name: Compare
+      - name: Compare as JSON
+        # Both files are parsed and re-serialised with keys sorted at every level, so
+        # formatting and key order cannot register as drift, and anything else does.
         run: |
-          if ! diff -u spec/v1/log.schema.json /tmp/published.json; then
-            echo "::error::Published schema differs from spec/v1/log.schema.json"
-            exit 1
-          fi
-          echo "identical"
+          node -e '
+            const fs = require("fs");
+            const canon = (v) => Array.isArray(v) ? v.map(canon)
+              : v && typeof v === "object"
+                ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])]))
+                : v;
+            const read = (p) => JSON.stringify(canon(JSON.parse(fs.readFileSync(p, "utf8"))), null, 2);
+            const ours = read("spec/v1/log.schema.json");
+            const theirs = read("/tmp/published.json");
+            if (ours !== theirs) {
+              fs.writeFileSync("/tmp/ours.json", ours);
+              fs.writeFileSync("/tmp/theirs.json", theirs);
+              process.exit(1);
+            }
+            console.log("the published schema is the same JSON as spec/v1/log.schema.json");
+          ' || { diff -u /tmp/ours.json /tmp/theirs.json; echo "::error::Published schema differs from spec/v1/log.schema.json"; exit 1; }

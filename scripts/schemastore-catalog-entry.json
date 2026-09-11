@@ -1,6 +1,6 @@
 {
   "name": "Onyx v1",
-  "description": "A portable personal food and body-weight diary.",
+  "description": "A portable personal food and body-weight diary",
   "fileMatch": [
     "*.onyx.json",
     "*.onx.json"

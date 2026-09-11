@@ -17,6 +17,13 @@ carries their name rather than the format's — a real cost, accepted knowingly.
 puts a document's identity in `format` and `specVersion` rather than in `$schema`, moving
 that URL later is a schema edit and a redirect, never a break.
 
+Their repository runs Prettier with a key-sorting plugin over every contributed file, so
+the hosted copy has `$`-prefixed keys first and different line wrapping. It is the same
+schema; `spec-drift.yml` compares the two as JSON for exactly this reason. Their check also
+rejects a catalog `description` ending in a full stop, and flags draft 2020-12 as a "high"
+schema version, which is waived by listing the file under `highSchemaVersion` in
+`src/schema-validation.jsonc`. Both are handled in the submission.
+
 ## Submitting
 
 Build the exact file set first, so nothing drifts from `spec/` and `corpus/`:

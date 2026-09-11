@@ -35,7 +35,8 @@ rmSync(staging, { recursive: true, force: true });
 mkdirSync(join(staging, "test", NAME), { recursive: true });
 mkdirSync(join(staging, "negative_test", NAME), { recursive: true });
 
-// The schema itself, byte for byte.
+// The schema itself. SchemaStore's Prettier will reorder its keys ($-prefixed first) and
+// rewrap it before merging, which is why spec-drift.yml compares as JSON rather than bytes.
 writeFileSync(join(staging, `${NAME}.json`), schemaText);
 
 const positive = [];

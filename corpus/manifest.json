@@ -189,6 +189,12 @@
       "description": "The shape a real producer writes: subject, goals, days, measurements, and a vendor block whose values are stringified app storage. The engine must carry the block through untouched without ever parsing inside it."
     },
     {
+      "file": "roundtrip/producer-export-all-identifier-slots.json",
+      "group": "roundtrip",
+      "spec": "3.5, 3.7",
+      "description": "Genuine output of the reference producer rather than a fixture modelled on it — emitted by Burnin 1.2.1 with a synthetic subject, since a real diary is not something to check into a repository. It is the only case exercising all three identifier slots: fdcId alone, offId alone for a food matched against Open Food Facts by name, and gtin beside offId for one reached by scanning. That gtin carries a leading zero, which is the whole reason the schema types it as a string — read as a number it silently becomes a different barcode. It also pairs both confidence states, present on the estimated entry and absent on every other, which is the §3.5 relationship the engine caught this producer breaking on its first run against real data."
+    },
+    {
       "dir": "consumer/foreign-document-no-vendor-block",
       "group": "consumer",
       "spec": "3.5, 3.6, 5",

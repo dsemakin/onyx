@@ -30,9 +30,11 @@ an application changing its internal storage never forces a specification bump.
 
 ## Published versions are immutable
 
-`spec/v1/` is byte-identical to the schema served at the canonical URL and to what real
-exports already point at. It is never edited in place. Corrections land as a new version
-directory, and CI rejects any pull request that modifies a published one.
+`spec/v1/` is the schema served at the canonical URL and the one real exports already point
+at. The served copy differs only in formatting and key order, because SchemaStore runs its
+own formatter over contributed files; a weekly workflow checks that nothing else differs.
+It is never edited in place. Corrections land as a new version directory, and CI rejects
+any pull request that modifies a published one.
 
 ## Migrations
 
