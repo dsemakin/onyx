@@ -2,17 +2,15 @@ name: Spec drift
 
 # The schema in this repository must stay the same schema as the one served at the
 # canonical URL, because documents in the wild point at that URL. "The same" is judged
-# as JSON, not as bytes: SchemaStore runs its own formatter over contributed files, which
-# reorders keys ($-prefixed ones first) and rewraps lines, and neither changes what the
-# schema means. This runs weekly rather than on every push, since it depends on a third
-# party being reachable.
-
-# The weekly schedule is commented out until the schema is registered with
-# SchemaStore; until then the URL 404s and this would fail every Monday for no
-# reason. Re-enable the cron line the moment registration lands.
+# as JSON, not as bytes, so that a host which reformats what it serves (SchemaStore's
+# Prettier reorders keys, for one) cannot register as drift while a changed value still
+# does. Today the host is jsDelivr serving this repository at the release tag, so the two
+# should be byte-identical as well; the looser comparison costs nothing and survives a
+# move. This runs weekly rather than on every push, since it depends on a third party
+# being reachable.
 on:
-  # schedule:
-  #   - cron: "0 6 * * 1"
+  schedule:
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 # Fetches a public URL and compares it to a file in the checkout. Nothing else.
@@ -28,8 +26,9 @@ jobs:
         id: fetch
         run: curl -sS --fail -m 30 "$CANONICAL_URL" -o /tmp/published.json
         env:
-          # Configuration, never hardcoded in the engine. This URL will move.
-          CANONICAL_URL: https://www.schemastore.org/onyx-v1.json
+          # Must equal DEFAULT_SCHEMA_ID in crates/onyx-core/src/lib.rs, which a test
+          # enforces: the URL documents carry is the URL this check watches.
+          CANONICAL_URL: https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json
       - name: Compare as JSON
         # Both files are parsed and re-serialised with keys sorted at every level, so
         # formatting and key order cannot register as drift, and anything else does.

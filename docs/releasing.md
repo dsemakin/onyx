@@ -144,13 +144,14 @@ is yours automatically; any other scope is an organisation that has to exist bef
 first publish. The names `onyx` on npm and `onyx` on crates.io both belong to other people,
 which is why the package is scoped.
 
-**The SchemaStore submission.** See [schemastore.md](schemastore.md). Doing it once gets
-every VS Code and JetBrains user validation, autocomplete and hover docs on ONYX files
-automatically, forever, at no ongoing cost. It is the highest adoption-per-effort item in
-the project. It also matters sooner than it looks: the engine already writes
-`https://www.schemastore.org/onyx-v1.json` into every new document, and that URL answers
-404 until the listing lands. Once it has, re-enable the weekly schedule in
-[`.github/workflows/spec-drift.yml`](../.github/workflows/spec-drift.yml).
+**Where the schema is served.** The engine writes a URL into every new document, and
+editors fetch it. Today that is jsDelivr serving `spec/v1/log.schema.json` from this
+repository at the `v1.0.0` tag, which needs nothing from a release: the tag exists, so the
+URL serves. If the host ever changes, `DEFAULT_SCHEMA_ID` in `crates/onyx-core/src/lib.rs`,
+`CANONICAL_URL` in the drift workflow and `spec/ERRATA.md` change together, and a test holds
+them to each other. The SchemaStore listing, which would give every editor the schema by
+file name without a `$schema` line, was declined until the format has users; see
+[schemastore.md](schemastore.md).
 
 ## After a specification release
 

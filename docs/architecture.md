@@ -9,8 +9,8 @@ implement Onyx in any language, and to prove you did it right.
 no network, no wall-clock; time is an injected parameter.
 
 **Distribution** — `crates/onyx-cli`, `crates/onyx-wasm`, `packages/npm`. Every artifact is
-carried by infrastructure someone else already operates: GitHub Releases, npm, SchemaStore.
-This project hosts nothing.
+carried by infrastructure someone else already operates: GitHub Releases, npm, and jsDelivr
+for the schema. This project hosts nothing.
 
 The ordering matters. If the only way to implement the format were to link the engine,
 the format's adoption cost would be higher than it is today, and adoption is the only

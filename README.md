@@ -53,6 +53,29 @@ onyx-core = { git = "https://github.com/dsemakin/onyx", tag = "v1.0.0" }
 The crates are not on crates.io yet; that is a deliberate choice explained in
 [docs/releasing.md](docs/releasing.md#why-not-cratesio).
 
+## Editor support
+
+A document that carries the schema URL gets validation, autocomplete and hover
+documentation in VS Code and every JetBrains IDE with nothing installed:
+
+```json
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json",
+  "format": "onyx",
+  "specVersion": "1.0.0"
+}
+```
+
+The reference engine writes that line into every document it produces. For files that
+lack it, VS Code can be told by file name, in `settings.json`:
+
+```json
+"json.schemas": [
+  { "fileMatch": ["*.onyx.json", "*.onx.json"],
+    "url": "https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json" }
+]
+```
+
 ## What is in here
 
 | Path | Contents | License |

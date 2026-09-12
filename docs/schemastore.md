@@ -1,5 +1,16 @@
 # SchemaStore submission
 
+**Status: declined on 2026-09-11, to be resubmitted once the format has users.** The
+maintainer's reason, in full: "to keep the catalog manageable, additions must include
+schemas that are widely used. This appears to be a new project that was created just
+yesterday." Every check on the pull request was green
+([#6341](https://github.com/SchemaStore/schemastore/pull/6341)); the bar is adoption, not
+quality. The prepared branch stays on the fork at `dsemakin/schemastore`, branch `onyx-v1`,
+and a Desktop clone of it sits beside this repository. Until then the schema is served from
+this repository through jsDelivr, pinned to the release tag — see `spec/ERRATA.md`, which is
+also where the served URL is recorded. When resubmitting, bring evidence: a producer
+shipping the format, download counts, a second implementation.
+
 [SchemaStore](https://www.schemastore.org) is the catalog VS Code and every JetBrains IDE
 consult to decide which JSON Schema applies to a file. Getting listed means anyone editing
 an Onyx document gets validation, autocomplete and hover documentation

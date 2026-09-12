@@ -61,8 +61,8 @@ Specification changes follow the process in [GOVERNANCE.md](GOVERNANCE.md). In s
 open an issue with the **Specification change** template first, and expect to discuss
 which documents already in the wild the change would affect.
 
-`spec/v1/` is what is published and what real exports point at, up to the formatting
-SchemaStore applies to files it hosts. It is never edited in place; new versions land as
+`spec/v1/` is what is published and what real exports point at. It is never edited in
+place; a wrong statement in it is corrected in `spec/ERRATA.md`, and new versions land as
 new directories.
 
 ## Style

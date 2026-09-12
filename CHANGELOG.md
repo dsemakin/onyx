@@ -12,7 +12,16 @@ independently from here and are expected to diverge.
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- The `$schema` URL the engine writes into new documents is now
+  `https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json`, the
+  repository's own copy served through jsDelivr at the release tag. SchemaStore declined to
+  list the schema until the format is widely used, so the URL 1.0.0 named does not resolve;
+  `spec/ERRATA.md` records the correction. The schema's `$id` is unchanged, and documents
+  carrying the old URL are read exactly as before — identity was never the `$schema` line.
+- The weekly spec-drift check now runs, against the served URL, and a test holds that URL,
+  the engine constant and the erratum to the same string.
 
 ## [1.0.0] - 2026-09-11
 

@@ -64,12 +64,17 @@ pub const REPORT_VERSION: i64 = 1;
 /// Registered under the vendor tree with the RFC 6839 `+json` structured syntax suffix.
 pub const MEDIA_TYPE: &str = "application/vnd.onyx+json";
 
-/// The `$schema` value written into new documents.
+/// The `$schema` value written into new documents: where the 1.0.0 schema is served.
 ///
 /// Configuration, not identity — never branch on it, and never compare against it when
-/// deciding whether a document is ONYX. Governance is moving off this host, so documents
-/// carrying a different value are expected and valid.
-pub const DEFAULT_SCHEMA_ID: &str = "https://www.schemastore.org/onyx-v1.json";
+/// deciding whether a document is ONYX. It is deliberately not the schema's own `$id`:
+/// that is a name, fixed when the specification was published, while this is a location,
+/// and locations move. The spec named SchemaStore; SchemaStore declined to list a format
+/// with no users yet (see `spec/ERRATA.md`), so the schema is served from the repository
+/// through jsDelivr, pinned to the release tag so the bytes can never change underneath a
+/// document. Documents carrying a different value are expected and valid.
+pub const DEFAULT_SCHEMA_ID: &str =
+    "https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json";
 
 /// Reads a document, checking only that it is one and that this build can understand it.
 ///

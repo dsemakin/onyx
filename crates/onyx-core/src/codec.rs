@@ -477,7 +477,7 @@ mod tests {
     /// cover both halves of the mapping: that reading claims it, and that writing puts it
     /// back.
     const COMPLETE: &str = r#"{
-      "$schema": "https://www.schemastore.org/onyx-v1.json",
+      "$schema": "https://cdn.jsdelivr.net/gh/dsemakin/onyx@v1.0.0/spec/v1/log.schema.json",
       "format": "onyx",
       "specVersion": "1.0.0",
       "exportedAt": "2026-08-14T12:00:00+03:00",

@@ -22,35 +22,48 @@ fn close(a: f64, b: f64) -> bool {
     (a - b).abs() <= 1e-6 * a.abs().max(b.abs()).max(1.0)
 }
 
-/// The schema's own `$id`, the constant the engine writes into documents, and the URL the
-/// SchemaStore catalog points at must all be the same string.
+/// The schema has a name and a location, and they are held to different sources.
 ///
-/// They live in three files that are edited at different times for different reasons,
-/// which is exactly how a document ends up pointing at a schema that is not the one it was
-/// written against.
+/// Its `$id` is the name the published specification gave it, and the SchemaStore
+/// catalog entry must use that same string, because a listing there is a listing *of*
+/// that identity. The constant the engine writes into documents is the location the
+/// schema is actually served from, and the drift workflow must fetch that same URL —
+/// otherwise the check that the served copy matches `spec/v1` is checking a different
+/// URL from the one documents carry. The erratum that explains why the two differ has to
+/// name the served URL, so a reader of the frozen spec can find it.
+///
+/// Four files, edited at different times for different reasons, which is exactly how a
+/// document ends up pointing at a schema that is not the one it was written against.
 #[test]
 fn the_schema_url_agrees_everywhere() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let read = |rel: &str| std::fs::read_to_string(root.join(rel)).expect(rel);
 
-    let schema = json::parse(
-        &std::fs::read_to_string(root.join("spec/v1/log.schema.json")).expect("the schema"),
-    )
-    .expect("the schema is valid JSON");
+    let schema = json::parse(&read("spec/v1/log.schema.json")).expect("the schema is valid JSON");
     let declared = schema["$id"].as_str().expect("the schema declares an $id");
 
-    let catalog = json::parse(
-        &std::fs::read_to_string(root.join("scripts/schemastore-catalog-entry.json"))
-            .expect("the catalog entry"),
-    )
-    .expect("the catalog entry is valid JSON");
-    let published = catalog["url"].as_str().expect("the catalog names a url");
+    let catalog = json::parse(&read("scripts/schemastore-catalog-entry.json"))
+        .expect("the catalog entry is valid JSON");
+    let listed = catalog["url"].as_str().expect("the catalog names a url");
+    assert_eq!(declared, listed, "schema $id vs SchemaStore catalog url");
 
+    let workflow = read(".github/workflows/spec-drift.yml");
+    let fetched = workflow
+        .lines()
+        .find_map(|l| l.trim().strip_prefix("CANONICAL_URL:"))
+        .expect("spec-drift.yml sets CANONICAL_URL")
+        .trim();
     assert_eq!(
-        declared,
+        fetched,
         onyx_core::DEFAULT_SCHEMA_ID,
-        "schema $id vs engine constant"
+        "the URL the drift check fetches vs the URL the engine writes into documents"
     );
-    assert_eq!(declared, published, "schema $id vs SchemaStore catalog url");
+
+    let errata = read("spec/ERRATA.md");
+    assert!(
+        errata.contains(onyx_core::DEFAULT_SCHEMA_ID),
+        "spec/ERRATA.md must name the URL the schema is served from"
+    );
 }
 
 #[test]
