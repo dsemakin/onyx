@@ -24,9 +24,11 @@ do not move between trackers.
 
 ## Status
 
-The specification is at **1.0.0** and is implemented by one producer. This repository
-is building the reference engine; it is pre-release and the crates are not yet
-published. A second implementer is actively wanted — see [GOVERNANCE.md](.github/GOVERNANCE.md).
+The specification is at **1.0.0**. The reference engine is released at the same version:
+binaries on the [releases page](https://github.com/dsemakin/onyx/releases) and the
+zero-install checker on npm. The first producer ships it — [Burnin](https://bein.ltd)
+exports and imports Onyx documents since version 1.2.2 (September 2026). A second
+implementer is actively wanted — see [GOVERNANCE.md](.github/GOVERNANCE.md).
 
 ## Quick start
 
@@ -108,10 +110,16 @@ written here. That is a deliberate trade, argued in full — including what it c
 
 ## Implementations
 
-| Implementation | Role | Conformance |
-|---|---|---|
-| [Burnin](https://bein.ltd) | Producer, consumer | Corpus pending |
-| [examples/reader-py](examples/reader-py/) | Consumer | Passes all four groups |
+| Implementation | Role | Since | Conformance |
+|---|---|---|---|
+| [Burnin](https://bein.ltd) | Producer, consumer | 1.2.2, September 2026 | Export verified against the reference engine |
+| [examples/reader-py](examples/reader-py/) | Consumer | 1.0.0 | Passes all four corpus groups |
+
+**Burnin** is a calorie counter for [iPhone](https://apps.apple.com/app/id6762124347) and
+[Android](https://play.google.com/store/apps/details?id=com.allephefes.burnin) with no
+account and no server: the diary lives on the phone, and "export the whole thing" produces
+an Onyx document. It is where this format started, and its import merges rather than
+overwrites, which is the behaviour §2 asks of a consumer restoring an older file.
 
 The Python reader is a reference example rather than an independent implementer — it proves
 the corpus is passable and the specification complete, not that anyone else has adopted the
