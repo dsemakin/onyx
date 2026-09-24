@@ -112,7 +112,7 @@ written here. That is a deliberate trade, argued in full — including what it c
 
 | Implementation | Role | Since | Conformance |
 |---|---|---|---|
-| [Burnin](https://bein.ltd) | Producer, consumer | 1.2.2, September 2026 | Export verified against the reference engine |
+| [Burnin](https://bein.ltd) | Producer, consumer | 1.2.2, September 2026 | Runs the full corpus in its test suite as a consumer; export verified against the reference engine |
 | [examples/reader-py](examples/reader-py/) | Consumer | 1.0.0 | Passes all four corpus groups |
 
 **Burnin** is a calorie counter for [iPhone](https://apps.apple.com/app/id6762124347) and
