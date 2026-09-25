@@ -23,6 +23,30 @@ independently from here and are expected to diverge.
 - The weekly spec-drift check now runs, against the served URL, and a test holds that URL,
   the engine constant and the erratum to the same string.
 
+### Fixed
+
+- Timestamps accepted a sign inside a numeric field: `T+8:30:00` read as eight o'clock and
+  `++3:00` as an offset. Every field is now digits only, as dates already were.
+- `day/malformed-date` printed `Some("2026-02-30")`, and said nothing useful when the date
+  was absent.
+- The Python reader spelled the goal direction `lose` where the specification says `loss`,
+  so every weight-loss goal drew a spurious note. It also lacked the two verdict-changing
+  rules no corpus case asserted, `time/malformed` and `day/malformed-date`, and so accepted
+  documents the engine rejects; and it read Unicode digits as dates. All fixed, together
+  with `entry/confidence-without-estimate` and `day/energy-mismatch`, which the example
+  document exercises.
+- The wasm corpus runner never checked `notes` and silently skipped expectations it did not
+  know. It now declares what it understands, like the Rust and Python runners.
+
+### Added
+
+- Corpus: `valid/specification-example.json`, the example from SPEC.md verbatim;
+  `invalid/timestamp-without-an-offset.json`;
+  `invalid/date-that-does-not-exist.json`.
+- The `exhaustive` expectation: the listed `warns` and `notes` are the only findings allowed.
+- `spec/ERRATA.md` E2: the example document puts `confidence` on a `database` entry, which
+  §3.5 says has no meaning.
+
 ## [1.0.0] - 2026-09-11
 
 Initial release. There is no earlier version to compare against, so this entry describes

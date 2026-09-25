@@ -147,7 +147,14 @@ fn every_case_in_the_manifest_holds() {
 /// against a reader that does nothing of the kind. Each runner declares what it can check
 /// and fails on anything else, so the next expectation added to the manifest breaks every
 /// implementation that has not implemented it — loudly, which is the point.
-const UNDERSTOOD: &[&str] = &["warns", "notes", "rule", "schemaValid", "accepted"];
+const UNDERSTOOD: &[&str] = &[
+    "warns",
+    "notes",
+    "rule",
+    "schemaValid",
+    "accepted",
+    "exhaustive",
+];
 
 fn check_expectations_are_understood(case: &Value) -> Result<(), String> {
     let Some(expect) = case["expect"].as_object() else {
@@ -221,6 +228,43 @@ fn check_valid(text: &str, case: &Value) -> Result<(), String> {
                 } else {
                     saw.join(", ")
                 }
+            ));
+        }
+    }
+
+    // `warns` and `notes` say what must be reported, never what must not. So a finding
+    // nobody should raise went unnoticed: the Python reader flagged the spec's own example
+    // for `direction: "loss"`, a word it had spelled "lose", and every case passed. With
+    // `exhaustive`, the listed findings are the only ones allowed.
+    if case["expect"]["exhaustive"].as_bool() == Some(true) {
+        let listed = |key: &str, rule: &str| {
+            case["expect"][key]
+                .as_array()
+                .unwrap_or_default()
+                .iter()
+                .any(|expected| expected.as_str() == Some(rule))
+        };
+        let extra: Vec<String> = report
+            .findings
+            .iter()
+            .filter(|finding| match finding.severity {
+                onyx_core::Severity::Warning => !listed("warns", finding.rule),
+                onyx_core::Severity::Info => !listed("notes", finding.rule),
+                onyx_core::Severity::Error => true,
+            })
+            .map(|finding| {
+                format!(
+                    "{}({}) at {}",
+                    finding.rule,
+                    finding.severity.name(),
+                    finding.path
+                )
+            })
+            .collect();
+        if !extra.is_empty() {
+            return Err(format!(
+                "`exhaustive`, but also reported: {}",
+                extra.join(", ")
             ));
         }
     }

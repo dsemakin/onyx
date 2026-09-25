@@ -110,7 +110,10 @@ PORTION = set(MASS_KG) | VOLUME | SCALAR
 MEAL_TYPES = {"breakfast", "lunch", "dinner", "snack"}
 SOURCES = {"manual", "barcode", "database", "estimated"}
 SEXES = {"female", "male", "other"}
-GOAL_DIRECTIONS = {"lose", "maintain", "gain"}
+# "loss", as the specification's own example writes it. This said "lose" for as long as
+# the reader existed, so every real diary with a weight-loss goal drew a spurious note here
+# and nowhere else. The corpus case valid/specification-example.json now fails on it.
+GOAL_DIRECTIONS = {"loss", "maintain", "gain"}
 GOAL_TYPES = {"targetWeight", "weightDirection"}
 MEASUREMENT_TYPES = {"bodyMass"}
 
@@ -142,6 +145,45 @@ def local_date(timestamp):
     if isinstance(timestamp, str) and re.match(r"^\d{4}-\d{2}-\d{2}T", timestamp):
         return timestamp[:10]
     return None
+
+
+# RFC 3339 as §2.6 uses it: every field digits only, a `T`, optional fractional seconds,
+# and either `Z` or a `±HH:MM` offset. `Z` parses — it is well-formed — and is then reported
+# separately, because it loses the local day rather than being unreadable.
+# re.ASCII throughout: in Python `\d` also matches Arabic-Indic and other Unicode digits,
+# and `int()` reads them, so without it this reader accepted dates the engine rejects.
+_TIMESTAMP = re.compile(
+    r"^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:[Zz]|([+-])(\d{2}):(\d{2}))$",
+    re.ASCII,
+)
+
+
+def real_date(text):
+    """The date as a ``datetime.date`` if ``text`` is a real calendar date, else ``None``."""
+    if not isinstance(text, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", text, re.ASCII):
+        return None
+    try:
+        return datetime.date(int(text[:4]), int(text[5:7]), int(text[8:10]))
+    except ValueError:
+        return None
+
+
+def parse_timestamp(timestamp):
+    """The local date if ``timestamp`` is well-formed, else ``None``.
+
+    Mirrors ``Timestamp::parse`` in the engine, field for field — including a leap second —
+    because the two decide the same verdict and the corpus holds them to it.
+    """
+    match = _TIMESTAMP.match(timestamp) if isinstance(timestamp, str) else None
+    if match is None:
+        return None
+    date = real_date(timestamp[:10])
+    hour, minute, second = (int(match.group(n)) for n in (4, 5, 6))
+    if date is None or hour > 23 or minute > 59 or second > 60:
+        return None
+    if match.group(7) is not None and (int(match.group(8)) > 23 or int(match.group(9)) > 59):
+        return None
+    return date
 
 
 def instant(timestamp):
@@ -244,7 +286,14 @@ def _check_atwater(nutrients, path, findings):
 
 
 def _check_timestamp(timestamp, path, findings):
-    if isinstance(timestamp, str) and timestamp.endswith(("Z", "z")):
+    """Report a malformed or UTC-normalised timestamp; return its local date if readable."""
+    date = parse_timestamp(timestamp)
+    if date is None:
+        findings.append(
+            _finding("error", "time/malformed", path, f"{timestamp!r} is not RFC 3339 with an offset")
+        )
+        return None
+    if timestamp.endswith(("Z", "z")):
         findings.append(
             _finding(
                 "error",
@@ -253,6 +302,7 @@ def _check_timestamp(timestamp, path, findings):
                 "normalised to UTC, so the local day this belonged to is gone",
             )
         )
+    return date
 
 
 def _check_vocabulary(value, known, noun, path, findings):
@@ -272,7 +322,10 @@ def validate(document):
     """Return findings. Only ``error`` findings make a document non-conforming."""
     findings = []
 
-    _check_timestamp(document.get("exportedAt"), "/exportedAt", findings)
+    # A timestamp is checked only when it is present as a string. The engine reads any other
+    # value as absent, and the two must agree on which documents they reject.
+    if isinstance(document.get("exportedAt"), str):
+        _check_timestamp(document["exportedAt"], "/exportedAt", findings)
 
     if "timeZone" not in document:
         findings.append(
@@ -310,28 +363,60 @@ def validate(document):
             continue
         base = f"/days/{index}"
 
-        date = day.get("date")
-        if date in seen:
+        raw = day.get("date")
+        date = real_date(raw)
+        if date is None:
+            # Absent counts: §3.2 makes the date what a day *is*, and the engine agrees.
+            findings.append(
+                _finding(
+                    "error",
+                    "day/malformed-date",
+                    f"{base}/date",
+                    f"{raw!r} is not a real calendar date in YYYY-MM-DD form",
+                )
+            )
+        elif date in seen:
             findings.append(
                 _finding(
                     "error",
                     "day/duplicate-date",
                     f"{base}/date",
-                    f"{date} already appears at /days/{seen[date]}",
+                    f"{raw} already appears at /days/{seen[date]}",
                 )
             )
-        elif isinstance(date, str):
+        else:
             seen[date] = index
 
         for key in ("energyTarget", "energyConsumed"):
             _check_unit(day.get(key), ENERGY, "energy", f"{base}/{key}", findings)
+
+        entries = [entry for entry in (day.get("entries") or []) if isinstance(entry, dict)]
+
+        # The recorded total may differ from its entries (§3.3), so a gap is information,
+        # not a defect: the same 1 kcal and 2 % thresholds as the engine.
+        recorded = to_kcal(day.get("energyConsumed"))
+        energies = [to_kcal((entry.get("nutrients") or {}).get("energy")) for entry in entries]
+        energies = [value for value in energies if value is not None]
+        if recorded is not None and energies:
+            summed = sum(energies)
+            gap = abs(summed - recorded)
+            if gap > 1.0 and gap > max(recorded, summed) * 0.02:
+                findings.append(
+                    _finding(
+                        "info",
+                        "day/energy-mismatch",
+                        f"{base}/energyConsumed",
+                        f"recorded as {recorded:.0f} kcal but the entries sum to {summed:.0f}",
+                    )
+                )
 
         for position, entry in enumerate(day.get("entries") or []):
             if not isinstance(entry, dict):
                 continue
             entry_path = f"{base}/entries/{position}"
 
-            _check_timestamp(entry.get("loggedAt"), f"{entry_path}/loggedAt", findings)
+            if isinstance(entry.get("loggedAt"), str):
+                _check_timestamp(entry["loggedAt"], f"{entry_path}/loggedAt", findings)
             _check_vocabulary(
                 entry.get("mealType"), MEAL_TYPES, "mealType", f"{entry_path}/mealType", findings
             )
@@ -350,6 +435,16 @@ def validate(document):
                             f"confidence is {confidence}; §3.5 defines it on 0..1",
                         )
                     )
+            numeric = isinstance(confidence, (int, float)) and not isinstance(confidence, bool)
+            if numeric and entry.get("source") != "estimated":
+                findings.append(
+                    _finding(
+                        "warning",
+                        "entry/confidence-without-estimate",
+                        f"{entry_path}/confidence",
+                        "§3.5 gives confidence meaning only when source is `estimated`",
+                    )
+                )
             _check_unit(entry.get("quantity"), PORTION, "portion", f"{entry_path}/quantity", findings)
 
             # `%` is in the schema's portion enum and has no meaning in §3.4. Accepted,
@@ -384,7 +479,8 @@ def validate(document):
             f"{path}/type",
             findings,
         )
-        _check_timestamp(measurement.get("observedAt"), f"{path}/observedAt", findings)
+        if isinstance(measurement.get("observedAt"), str):
+            _check_timestamp(measurement["observedAt"], f"{path}/observedAt", findings)
         if measurement.get("type") == "bodyMass":
             _check_unit(measurement.get("value"), MASS_KG, "mass", f"{path}/value", findings)
 

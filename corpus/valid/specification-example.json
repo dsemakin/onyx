@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.schemastore.org/onyx-v1.json",
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-16T09:12:00+03:00",
+  "timeZone": "Europe/Berlin",
+  "producer": { "name": "Burnin", "version": "1.2.0", "platform": "android" },
+
+  "subject": {
+    "sex": "female",
+    "age": { "value": 34, "unit": "a" },
+    "height": { "value": 165, "unit": "cm" },
+    "preferredUnits": { "mass": "kg", "energy": "kcal" }
+  },
+
+  "goals": [
+    { "type": "targetWeight", "value": { "value": 62, "unit": "kg" } },
+    { "type": "weightDirection", "direction": "loss" }
+  ],
+
+  "days": [
+    {
+      "date": "2026-08-10",
+      "energyTarget":   { "value": 2100, "unit": "kcal" },
+      "energyConsumed": { "value": 1800, "unit": "kcal" },
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:30:00+03:00",
+          "mealType": "breakfast",
+          "name": "Oats",
+          "identifiers": { "fdcId": 169705, "gtin": "5011234567890" },
+          "quantity": { "value": 100, "unit": "g" },
+          "servingDescription": "1 cup",
+          "nutrients": {
+            "energy":       { "value": 389, "unit": "kcal" },
+            "protein":      { "value": 16.9, "unit": "g" },
+            "carbohydrate": { "value": 66, "unit": "g" },
+            "fat":          { "value": 6.9, "unit": "g" }
+          },
+          "source": "database",
+          "confidence": 0.9
+        }
+      ]
+    }
+  ],
+
+  "bodyMeasurements": [
+    { "observedAt": "2026-08-10T07:00:00+03:00", "type": "bodyMass",
+      "value": { "value": 80.4, "unit": "kg" } }
+  ],
+
+  "extensions": {
+    "ltd.bein.burnin": { "blockVersion": 1, "entries": { "…": "…" } }
+  }
+}

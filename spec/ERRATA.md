@@ -30,3 +30,15 @@ its `$schema` line (§2.2), so documents already carrying the SchemaStore URL re
 and are read exactly as before. The submission stays prepared; it will be resubmitted when
 there is usage to point at, and if it is accepted the served URL can move again in the same
 way, by changing what new documents carry.
+
+### E2 — 2026-09-25 — `confidence` in the example document
+
+**`SPEC.md` shows** (§3, the example document) an entry with `"source": "database"` and
+`"confidence": 0.9`.
+
+**What is true.** §3.5 says `confidence` "is only meaningful for `estimated`". The example
+contradicts the section that defines the member, and a reader following the example writes
+documents the reference engine warns about (`entry/confidence-without-estimate`). The rule
+stands and the example is wrong: `confidence` belongs only on an entry whose `source` is
+`estimated`. The example is kept verbatim in `corpus/valid/specification-example.json`, which
+pins that warning as one of exactly two findings the example produces.

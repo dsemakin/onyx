@@ -59,6 +59,21 @@
       "description": "A 30 g portion whose energy is per-portion while its macros were left per 100 g. Both halves are individually plausible, which is what makes this the silent error \u00a73.3 exists to prevent. Nothing in one document can prove which half is wrong, so it warns rather than rejects."
     },
     {
+      "file": "valid/specification-example.json",
+      "group": "valid",
+      "spec": "3",
+      "expect": {
+        "warns": [
+          "entry/confidence-without-estimate"
+        ],
+        "notes": [
+          "day/energy-mismatch"
+        ],
+        "exhaustive": true
+      },
+      "description": "The example document from SPEC.md \u00a73, verbatim. It exists so the specification's own example is held to the same rules as everything else, and `exhaustive` means these two findings are the only ones allowed. Both are correct: the example puts `confidence` on a `database` entry, which \u00a73.5 says has meaning only for `estimated` (spec/ERRATA.md E2), and records 1800 kcal consumed beside one 389 kcal entry, which \u00a73.3 permits. The Python reader drew a third finding here for as long as it existed: it spelled the goal direction `lose`, so `loss` was reported as unknown vocabulary, in this example and in every real diary with a weight-loss goal. Nothing asserted the absence of a finding, so nothing noticed."
+    },
+    {
       "file": "invalid/utc-normalised-timestamps.json",
       "group": "invalid",
       "spec": "2.6",
@@ -148,6 +163,26 @@
         "rule": "day/duplicate-date"
       },
       "description": "Two records for one local day, with different totals. A consumer has no way to decide which one is that day's history."
+    },
+    {
+      "file": "invalid/timestamp-without-an-offset.json",
+      "group": "invalid",
+      "spec": "2.6",
+      "expect": {
+        "rule": "time/malformed",
+        "schemaValid": false
+      },
+      "description": "`loggedAt` with no offset at all. A wall-clock time with no relationship to UTC cannot say which day it belongs to or be ordered against another. The schema's pattern rejects it too; the case exists because no corpus case asserted `time/malformed`, so an implementation could accept it and still pass."
+    },
+    {
+      "file": "invalid/date-that-does-not-exist.json",
+      "group": "invalid",
+      "spec": "3.2",
+      "expect": {
+        "rule": "day/malformed-date",
+        "schemaValid": true
+      },
+      "description": "A day dated 30 February. The schema's pattern is `\\d{4}-\\d{2}-\\d{2}` and cannot know month lengths, so this is schema-valid; a reader has to check the calendar. No corpus case asserted `day/malformed-date`, so an implementation could accept it and still pass."
     },
     {
       "file": "roundtrip/unknown-members-survive.json",

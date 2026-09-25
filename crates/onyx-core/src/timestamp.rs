@@ -96,10 +96,10 @@ impl Timestamp {
         }
 
         let date = CivilDate::parse(input.get(0..10)?)?;
-        let hour: u32 = input.get(11..13)?.parse().ok()?;
-        let minute: u32 = input.get(14..16)?.parse().ok()?;
+        let hour = two_digits(input, 11)?;
+        let minute = two_digits(input, 14)?;
         // 60 is permitted: RFC 3339 allows a leap second.
-        let second: u32 = input.get(17..19)?.parse().ok()?;
+        let second = two_digits(input, 17)?;
         if hour > 23 || minute > 59 || second > 60 {
             return None;
         }
@@ -125,8 +125,8 @@ impl Timestamp {
                     b'-' => -1,
                     _ => return None,
                 };
-                let hours: i32 = rest.get(1..3)?.parse().ok()?;
-                let minutes: i32 = rest.get(4..6)?.parse().ok()?;
+                let hours = two_digits(rest, 1)? as i32;
+                let minutes = two_digits(rest, 4)? as i32;
                 if hours > 23 || minutes > 59 {
                     return None;
                 }
@@ -161,6 +161,20 @@ impl Timestamp {
     pub fn is_utc_normalised(&self) -> bool {
         matches!(self.offset, Offset::Utc)
     }
+}
+
+/// The two characters at `at`, read as a number only if both are ASCII digits.
+///
+/// `parse::<u32>` takes a sign, so `T+1:00:00` read as one o'clock and `+-3:00` as an
+/// offset: the same generosity that let `-032-01-01` through as a date, one layer down.
+/// Byte-indexed on purpose; a multi-byte character anywhere in the field fails here rather
+/// than splitting a code point.
+fn two_digits(input: &str, at: usize) -> Option<u32> {
+    let pair = input.as_bytes().get(at..at + 2)?;
+    if !pair.iter().all(u8::is_ascii_digit) {
+        return None;
+    }
+    Some(u32::from(pair[0] - b'0') * 10 + u32::from(pair[1] - b'0'))
 }
 
 fn days_in_month(year: i32, month: u32) -> u32 {
@@ -273,6 +287,29 @@ mod tests {
             assert!(
                 CivilDate::parse(rejected).is_none(),
                 "{rejected:?} was accepted as a date"
+            );
+        }
+    }
+
+    /// The same rule for the clock and the offset. The Python reader parses these with a
+    /// digits-only pattern, so without this the two implementations disagreed about whether
+    /// such a document conforms, and no corpus case would have noticed.
+    #[test]
+    fn a_time_and_an_offset_are_digits_and_nothing_else() {
+        assert!(Timestamp::parse("2026-08-10T08:30:00+03:00").is_some());
+
+        for rejected in [
+            "2026-08-10T+8:30:00+03:00",
+            "2026-08-10T08:+3:00+03:00",
+            "2026-08-10T08:30:+0+03:00",
+            "2026-08-10T08:30:00++3:00",
+            "2026-08-10T08:30:00+03:+0",
+            "2026-08-10T08:30:00+-3:00",
+            "2026-08-10T0八:30:00+03:00",
+        ] {
+            assert!(
+                Timestamp::parse(rejected).is_none(),
+                "{rejected:?} was accepted as a timestamp"
             );
         }
     }

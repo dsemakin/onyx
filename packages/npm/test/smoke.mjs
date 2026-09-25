@@ -29,15 +29,43 @@ const manifest = JSON.parse(readFileSync(join(corpus, "manifest.json"), "utf8"))
 const failures = [];
 const close = (a, b) => Math.abs(a - b) <= 1e-6 * Math.max(Math.abs(a), Math.abs(b), 1);
 
+// Every `expect` key this runner knows how to check. A runner that skips an expectation it
+// does not implement reports a pass it never established. Round ten added this list to the
+// Rust and Python runners after `notes` went unchecked in one of them; this runner had the
+// same gap — it never checked `notes` at all — and nothing noticed, because nothing asked.
+const UNDERSTOOD = new Set(["warns", "notes", "rule", "schemaValid", "accepted", "exhaustive"]);
+
+function expectationsAreUnderstood(testCase, name) {
+  const unknown = Object.keys(testCase.expect ?? {}).filter((key) => !UNDERSTOOD.has(key));
+  for (const key of unknown) failures.push(`${name}: the manifest expects "${key}", which this runner cannot check`);
+  return unknown.length === 0;
+}
+
 function checkValid(report, testCase, name) {
-  const errors = (report.findings ?? []).filter((f) => f.severity === "error");
+  const findings = report.findings ?? [];
+  const errors = findings.filter((f) => f.severity === "error");
   if (!report.conforming || errors.length > 0) {
     failures.push(`${name}: expected acceptance, got ${errors.map((f) => f.rule).join(", ") || "conforming=false"}`);
     return;
   }
-  for (const rule of testCase.expect?.warns ?? []) {
-    const found = (report.findings ?? []).some((f) => f.rule === rule && f.severity === "warning");
-    if (!found) failures.push(`${name}: expected a warning "${rule}"`);
+  const expect = testCase.expect ?? {};
+  for (const [key, severity, noun] of [["warns", "warning", "a warning"], ["notes", "info", "a note"]]) {
+    for (const rule of expect[key] ?? []) {
+      const found = findings.some((f) => f.rule === rule && f.severity === severity);
+      if (!found) failures.push(`${name}: expected ${noun} "${rule}"`);
+    }
+  }
+  // `warns` and `notes` say what must be reported, never what must not. With `exhaustive`,
+  // the listed findings are the only ones allowed.
+  if (expect.exhaustive === true) {
+    const allowed = new Set([
+      ...(expect.warns ?? []).map((rule) => `warning ${rule}`),
+      ...(expect.notes ?? []).map((rule) => `info ${rule}`),
+    ]);
+    const extra = findings.filter((f) => !allowed.has(`${f.severity} ${f.rule}`));
+    if (extra.length > 0) {
+      failures.push(`${name}: \`exhaustive\`, but also reported ${extra.map((f) => `${f.rule}(${f.severity}) at ${f.path}`).join(", ")}`);
+    }
   }
 }
 
@@ -141,6 +169,8 @@ function checkConsumer(text, folder, name) {
 for (const testCase of manifest.cases) {
   const name = testCase.file ?? `${testCase.dir}/document.json`;
   const text = readFileSync(join(corpus, name), "utf8");
+
+  if (!expectationsAreUnderstood(testCase, name)) continue;
 
   if (testCase.group === "consumer") {
     checkConsumer(text, testCase.dir, name);

@@ -51,6 +51,18 @@ def check_valid(text, case, name):
             saw = ", ".join(f"{f['rule']}({f['severity']})" for f in findings) or "none"
             fail(name, f"expected a warning {rule!r}; findings were: {saw}")
 
+    # `warns` and `notes` say what must be reported, never what must not, which is how this
+    # reader flagged `direction: "loss"` in the spec's own example — it had the word as
+    # "lose" — with every case passing. `exhaustive` makes the listed findings the only ones.
+    expect = case.get("expect") or {}
+    if expect.get("exhaustive") is True:
+        allowed = {("warning", rule) for rule in expect.get("warns", [])}
+        allowed |= {("info", rule) for rule in expect.get("notes", [])}
+        extra = [f for f in findings if (f["severity"], f["rule"]) not in allowed]
+        if extra:
+            listed = ", ".join(f"{f['rule']}({f['severity']}) at {f['path']}" for f in extra)
+            fail(name, f"`exhaustive`, but also reported: {listed}")
+
 
 def check_invalid(text, case, name):
     expected = (case.get("expect") or {}).get("rule")
@@ -140,7 +152,7 @@ def check_consumer(text, folder, name):
 # passed here against a reader with no info severity at all. Declaring the set means the next
 # expectation added to the manifest fails loudly in every implementation that has not caught
 # up, which is exactly what should happen.
-UNDERSTOOD = {"warns", "notes", "rule", "schemaValid", "accepted"}
+UNDERSTOOD = {"warns", "notes", "rule", "schemaValid", "accepted", "exhaustive"}
 
 
 def check_expectations_are_understood(name, case):

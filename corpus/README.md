@@ -29,6 +29,10 @@ Optional per case.
   [`../docs/conformance.md`](../docs/conformance.md).
 - `warns` — rules that must be reported at warning severity. A warning does not make a
   document non-conforming.
+- `notes` — rules that must be reported at info severity.
+- `exhaustive` — when `true`, the rules in `warns` and `notes` are the *only* findings the
+  document may produce. `warns` and `notes` alone say what must be reported, never what must
+  not, which is how a reader spelling a vocabulary word wrong passed every case.
 - `accepted` — whether a conforming consumer must accept the document.
 - `schemaValid` — whether the document validates against `spec/v1/log.schema.json`.
 

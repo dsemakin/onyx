@@ -298,14 +298,19 @@ fn check_days(document: &Document, report: &mut Report) {
                 Some(date)
             }
             None => {
+                // Rendered from the raw value, not with `{:?}` on the Option, which printed
+                // `Some("2026-02-30")` to whoever read the report.
+                let message = match &day.date {
+                    Some(raw) => {
+                        format!("{raw:?} is not a real calendar date in YYYY-MM-DD form.")
+                    }
+                    None => "This day has no date. §3.2 requires one in YYYY-MM-DD form.".into(),
+                };
                 report.push(
                     Severity::Error,
                     "day/malformed-date",
                     format!("{base}/date"),
-                    format!(
-                        "{:?} is not a real calendar date in YYYY-MM-DD form.",
-                        day.date
-                    ),
+                    message,
                 );
                 None
             }
