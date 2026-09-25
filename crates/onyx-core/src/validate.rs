@@ -429,33 +429,40 @@ fn check_entry(entry: &FoodEntry, day: Option<&CivilDate>, base: &str, report: &
         .as_deref()
         .and_then(|raw| check_timestamp(raw, &format!("{base}/loggedAt"), report));
 
-    // The rule §3.2 states — a local date must never be derived by converting a timestamp
-    // to UTC — cannot be checked against a date alone. It can be checked against the
-    // timestamp's own local date, which is exactly what an RFC 3339 offset preserves.
+    // `date` is the day the subject says the entry belongs to (§3.2) and `loggedAt` is when
+    // it was recorded. Those differ legitimately: a meal logged at 01:00 belongs to the
+    // evening before, and a dinner forgotten on Saturday and added on Monday belongs to
+    // Saturday. So a gap is never an error on its own.
+    //
+    // It was one, beyond a single day, on the theory that converting a timestamp to UTC
+    // drifts dates like this. It cannot: UTC conversion moves a date by at most one day. The
+    // first real export through the engine carried exactly one back-filled dinner, two days
+    // out, and the reference engine called an honest document non-conforming. The UTC defect
+    // §3.2 forbids shows up as a pattern of one-day gaps, which `check_systematic_drift`
+    // judges across the whole diary; a single entry cannot demonstrate it.
     if let (Some(stamp), Some(day)) = (stamp, day) {
         let drift = stamp.date.days_since(day);
         match drift.abs() {
             0 => {}
-            // §3.2 is explicit that a meal logged at 01:00 may belong to the previous day
-            // in the subject's mind, so one day out is legitimate and merely noted.
             1 => report.push(
                 Severity::Info,
                 "time/day-mismatch",
                 format!("{base}/loggedAt"),
                 format!(
-                    "Logged on {} but filed under {day}. One day out is legitimate for a \
-                     late-night meal; more than one is not.",
+                    "Logged on {} but filed under {day}. One day out is ordinary for a \
+                     late-night meal.",
                     stamp.date
                 ),
             ),
             _ => report.push(
-                Severity::Error,
+                Severity::Warning,
                 "time/day-mismatch",
                 format!("{base}/loggedAt"),
                 format!(
-                    "Logged on {} but filed under {day}, {drift} days apart. A local date \
-                     derived by converting a timestamp to UTC drifts exactly like this.",
-                    stamp.date
+                    "Logged on {} but filed under {day}, {} days apart. Legitimate for an \
+                     entry added after the fact; worth a look if it was not.",
+                    stamp.date,
+                    drift.abs()
                 ),
             ),
         }
@@ -842,13 +849,37 @@ mod tests {
     }
 
     #[test]
-    fn a_date_that_drifted_further_than_a_day_is_an_error() {
+    fn an_entry_added_days_later_is_a_warning_not_a_rejection() {
+        // A dinner filed under the 10th and logged on the 14th: back-filling, which real
+        // diaries contain. UTC conversion cannot move a date by four days, so this is not
+        // the defect §3.2 forbids, and a conforming document must stay conforming.
         let document = with_entry(r#"{ "loggedAt": "2026-08-14T09:00:00+03:00" }"#);
         let report = validate(&document);
 
         let finding = report.by_rule("time/day-mismatch").next().unwrap();
-        assert_eq!(finding.severity, Severity::Error);
-        assert!(!report.is_conforming());
+        assert_eq!(finding.severity, Severity::Warning);
+        assert!(
+            finding.message.contains("4 days apart"),
+            "{}",
+            finding.message
+        );
+        assert!(report.is_conforming());
+    }
+
+    #[test]
+    fn an_entry_logged_before_the_day_it_is_filed_under_reads_as_a_positive_gap() {
+        // The drift is signed; the message is not. "-2 days apart" is not a sentence.
+        let document = with_entry(r#"{ "loggedAt": "2026-08-08T09:00:00+03:00" }"#);
+        let finding = validate(&document)
+            .by_rule("time/day-mismatch")
+            .next()
+            .unwrap()
+            .clone();
+        assert!(
+            finding.message.contains(", 2 days apart"),
+            "{}",
+            finding.message
+        );
     }
 
     #[test]

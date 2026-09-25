@@ -56,7 +56,7 @@ not to this engine's wording.
 | `quantity/negative` | warning | No quantity in this format should be negative |
 | `time/malformed` | error | §2.6 — not RFC 3339 with an offset |
 | `time/utc-normalised` | error | §2.6 — `Z` keeps the instant and loses the local day |
-| `time/day-mismatch` | info / error | §3.2 — one day out is legitimate, more is not |
+| `time/day-mismatch` | info / warning | §3.2 — `loggedAt` falls on a different day than `date`; a note at one day, a warning beyond, never an error |
 | `time/systematic-day-drift` | warning | §3.2 — many one-day gaps leaning the same way |
 | `day/malformed-date` | error | §3.2 — not a real calendar date |
 | `day/duplicate-date` | error | §3.2 — two records for one local day |

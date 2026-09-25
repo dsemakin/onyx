@@ -22,6 +22,11 @@ independently from here and are expected to diverge.
   carrying the old URL are read exactly as before — identity was never the `$schema` line.
 - The weekly spec-drift check now runs, against the served URL, and a test holds that URL,
   the engine constant and the erratum to the same string.
+- `time/day-mismatch` is a warning beyond one day, where it was an error. `date` is the day
+  an entry belongs to and `loggedAt` is when it was recorded, and a dinner added two days
+  late is honest. The rule assumed a larger gap meant UTC conversion, which cannot move a
+  date by more than one day; the first real Burnin export was rejected for one back-filled
+  entry. `time/systematic-day-drift` still catches the UTC defect as a pattern.
 
 ### Fixed
 
@@ -33,15 +38,14 @@ independently from here and are expected to diverge.
   so every weight-loss goal drew a spurious note. It also lacked the two verdict-changing
   rules no corpus case asserted, `time/malformed` and `day/malformed-date`, and so accepted
   documents the engine rejects; and it read Unicode digits as dates. All fixed, together
-  with `entry/confidence-without-estimate` and `day/energy-mismatch`, which the example
-  document exercises.
+  with `time/day-mismatch`, `entry/confidence-without-estimate` and `day/energy-mismatch`.
 - The wasm corpus runner never checked `notes` and silently skipped expectations it did not
   know. It now declares what it understands, like the Rust and Python runners.
 
 ### Added
 
 - Corpus: `valid/specification-example.json`, the example from SPEC.md verbatim;
-  `invalid/timestamp-without-an-offset.json`;
+  `valid/entry-added-days-later.json`; `invalid/timestamp-without-an-offset.json`;
   `invalid/date-that-does-not-exist.json`.
 - The `exhaustive` expectation: the listed `warns` and `notes` are the only findings allowed.
 - `spec/ERRATA.md` E2: the example document puts `confidence` on a `database` entry, which

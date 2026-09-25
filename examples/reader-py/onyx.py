@@ -415,8 +415,23 @@ def validate(document):
                 continue
             entry_path = f"{base}/entries/{position}"
 
+            logged = None
             if isinstance(entry.get("loggedAt"), str):
-                _check_timestamp(entry["loggedAt"], f"{entry_path}/loggedAt", findings)
+                logged = _check_timestamp(entry["loggedAt"], f"{entry_path}/loggedAt", findings)
+
+            # `date` is the day the subject says the entry belongs to and `loggedAt` is when it
+            # was recorded; a late-night meal or a back-filled dinner separates them honestly.
+            # So a gap is never an error — noted at one day, a warning beyond.
+            if logged is not None and date is not None and logged != date:
+                apart = abs((logged - date).days)
+                findings.append(
+                    _finding(
+                        "info" if apart == 1 else "warning",
+                        "time/day-mismatch",
+                        f"{entry_path}/loggedAt",
+                        f"logged on {logged} but filed under {date}, {apart} day(s) apart",
+                    )
+                )
             _check_vocabulary(
                 entry.get("mealType"), MEAL_TYPES, "mealType", f"{entry_path}/mealType", findings
             )

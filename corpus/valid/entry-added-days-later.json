@@ -1,0 +1,49 @@
+{
+  "format": "onyx",
+  "specVersion": "1.0.0",
+  "exportedAt": "2026-08-14T09:00:00+02:00",
+  "timeZone": "Europe/Berlin",
+  "producer": {
+    "name": "Remembers Dinner Late"
+  },
+  "days": [
+    {
+      "date": "2026-08-10",
+      "entries": [
+        {
+          "loggedAt": "2026-08-10T08:15:00+02:00",
+          "mealType": "breakfast",
+          "name": "Yoghurt",
+          "nutrients": {
+            "energy": {
+              "value": 150,
+              "unit": "kcal"
+            }
+          }
+        },
+        {
+          "loggedAt": "2026-08-11T00:40:00+02:00",
+          "mealType": "snack",
+          "name": "Toast",
+          "nutrients": {
+            "energy": {
+              "value": 180,
+              "unit": "kcal"
+            }
+          }
+        },
+        {
+          "loggedAt": "2026-08-12T19:05:00+02:00",
+          "mealType": "dinner",
+          "name": "Risotto",
+          "nutrients": {
+            "energy": {
+              "value": 620,
+              "unit": "kcal"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

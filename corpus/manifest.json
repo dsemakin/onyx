@@ -74,6 +74,21 @@
       "description": "The example document from SPEC.md \u00a73, verbatim. It exists so the specification's own example is held to the same rules as everything else, and `exhaustive` means these two findings are the only ones allowed. Both are correct: the example puts `confidence` on a `database` entry, which \u00a73.5 says has meaning only for `estimated` (spec/ERRATA.md E2), and records 1800 kcal consumed beside one 389 kcal entry, which \u00a73.3 permits. The Python reader drew a third finding here for as long as it existed: it spelled the goal direction `lose`, so `loss` was reported as unknown vocabulary, in this example and in every real diary with a weight-loss goal. Nothing asserted the absence of a finding, so nothing noticed."
     },
     {
+      "file": "valid/entry-added-days-later.json",
+      "group": "valid",
+      "spec": "3.2",
+      "expect": {
+        "notes": [
+          "time/day-mismatch"
+        ],
+        "warns": [
+          "time/day-mismatch"
+        ],
+        "exhaustive": true
+      },
+      "description": "One day filed under 2026-08-10 with three entries: breakfast logged that morning, a snack logged at 00:40 the next night, and a dinner logged two days later. \u00a73.2 makes `date` the day the subject says the entry belongs to, and `loggedAt` is when it was recorded, so both gaps are honest. One day out is a note, more is a warning, and the document conforms. The engine used to reject the two-day gap as the signature of UTC conversion, which cannot move a date by more than one day; the first real Burnin export carried exactly one back-filled dinner and was called non-conforming for it."
+    },
+    {
       "file": "invalid/utc-normalised-timestamps.json",
       "group": "invalid",
       "spec": "2.6",
